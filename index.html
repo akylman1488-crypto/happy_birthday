@@ -78,11 +78,7 @@
             pointer-events: none;
         }
 
-        .intro-text-wrap {
-            position: relative;
-            z-index: 2;
-        }
-
+        .intro-text-wrap { position: relative; z-index: 2; }
         .intro-sub {
             font-size: 0.9rem;
             letter-spacing: 3px;
@@ -101,13 +97,149 @@
             line-height: 1.2;
         }
 
-        /* ОСНОВНОЙ КОНТЕЙНЕР */
-        #app-wrapper {
+        /* =========================================
+           ОБЩАЯ СЕТКА: БОКОВЫЕ ФОТО (3 ШТ НА СТРАНИЦУ) + ЦЕНТР
+           ========================================= */
+        .main-stage {
             position: relative;
             z-index: 2;
-            max-width: 700px;
+            max-width: 1260px;
             margin: 0 auto;
-            padding: 115px 18px 80px;
+            padding: 115px 16px 80px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 28px;
+        }
+
+        .side-photos {
+            width: 225px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 36px;
+            padding-top: 45px;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .side-photos:empty {
+            display: none;
+        }
+
+        .side-photos.switching {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        .polaroid-card {
+            background: #fffdf9;
+            padding: 10px 10px 26px 10px;
+            border-radius: 6px;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.48);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .side-left .polaroid-card:nth-child(1) { transform: rotate(-4deg); }
+        .side-left .polaroid-card:nth-child(2) { transform: rotate(3.5deg); }
+
+        .side-right .polaroid-card:nth-child(1) { transform: rotate(4deg); margin-top: 50px; }
+        .side-right .polaroid-card:nth-child(2) { transform: rotate(-3.5deg); }
+
+        .polaroid-card:hover {
+            transform: scale(1.07) rotate(0deg) !important;
+            box-shadow: 0 20px 40px rgba(255, 107, 157, 0.45);
+            z-index: 10;
+        }
+
+        .polaroid-card img {
+            width: 100%;
+            height: 195px;
+            object-fit: cover;
+            border-radius: 3px;
+            display: block;
+            background: #2a143d;
+        }
+
+        .polaroid-caption {
+            margin-top: 9px;
+            text-align: center;
+            font-family: Georgia, serif;
+            font-style: italic;
+            font-size: 0.85rem;
+            color: #3b1c4a;
+            font-weight: 600;
+        }
+
+        /* Адаптация под узкие экраны */
+        @media (max-width: 1060px) {
+            .main-stage {
+                flex-direction: column;
+                align-items: center;
+            }
+            .side-photos {
+                width: 100%;
+                max-width: 660px;
+                flex-direction: row;
+                justify-content: center;
+                gap: 14px;
+                padding-top: 0;
+            }
+            .side-right .polaroid-card:nth-child(1) {
+                margin-top: 0;
+            }
+            .polaroid-card {
+                flex: 1;
+                max-width: 210px;
+                padding: 8px 8px 20px 8px;
+            }
+            .polaroid-card img {
+                height: 145px;
+            }
+        }
+
+        /* Модальное окно для просмотра фото крупно */
+        #photo-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(8, 3, 18, 0.88);
+            backdrop-filter: blur(8px);
+            z-index: 9000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #photo-modal.open { display: flex; }
+        .modal-polaroid {
+            background: #fffdf9;
+            padding: 14px 14px 32px;
+            border-radius: 10px;
+            max-width: 440px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.7);
+        }
+        .modal-polaroid img {
+            width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        .modal-polaroid p {
+            margin-top: 12px;
+            font-family: Georgia, serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            color: #3b1c4a;
+        }
+
+        /* ОСНОВНОЙ ЦЕНТРАЛЬНЫЙ КОНТЕЙНЕР */
+        #app-wrapper {
+            max-width: 660px;
+            width: 100%;
+            flex-shrink: 0;
         }
 
         .top-bar {
@@ -150,7 +282,7 @@
         .hero-header h1 {
             font-family: Georgia, serif;
             font-style: italic;
-            font-size: clamp(2rem, 6vw, 3.1rem);
+            font-size: clamp(2rem, 5vw, 3rem);
             color: #ff9ebb;
             margin-bottom: 10px;
         }
@@ -482,6 +614,14 @@
         </div>
     </div>
 
+    <!-- УВЕЛИЧЕННЫЙ ПРОСМОТР ФОТО -->
+    <div id="photo-modal" onclick="closePhotoModal()">
+        <div class="modal-polaroid" onclick="event.stopPropagation()">
+            <img id="modal-img" src="" alt="Фото">
+            <p id="modal-cap"></p>
+        </div>
+    </div>
+
     <!-- БОЛЬШОЙ МИШКА В ПРАВОМ ВЕРХНЕМ УГЛУ -->
     <div class="bear-widget">
         <div class="bear-avatar" onclick="bearSpeak()" title="Нажми на мишку!">
@@ -489,169 +629,259 @@
             <span class="bear-paw">🐾</span>
         </div>
         <div class="bear-bubble" id="bear-speech">
-            Привет, Раяна! 🧸 С днём рождения! Нажми на меня, я скажу тебе секрет ✨
+            Привет, Raiana! 🧸 С днём рождения! Нажми на меня, я скажу тебе секрет ✨
         </div>
     </div>
 
-    <div id="app-wrapper">
-        <div class="top-bar">
-            <button class="music-btn" onclick="toggleMusic()">
-                <span id="music-icon">🎵</span> <span id="music-label">Включить мелодию</span>
-            </button>
-            <div class="date-pill" id="page-indicator">Страница 1 из 2 ✨</div>
+    <!-- ГЛАВНАЯ СЦЕНА: ФОТО СЛЕВА + ЦЕНТР + ФОТО СПРАВА (3 ФОТО НА СТРАНИЦУ) -->
+    <div class="main-stage">
+        <!-- ЛЕВАЯ КОЛОНКА ФОТО -->
+        <div class="side-photos side-left" id="left-photos"></div>
+
+        <!-- ЦЕНТРАЛЬНЫЙ БЛОК -->
+        <div id="app-wrapper">
+            <div class="top-bar">
+                <button class="music-btn" onclick="toggleMusic()">
+                    <span id="music-icon">🎵</span> <span id="music-label">Включить мелодию</span>
+                </button>
+                <div class="date-pill" id="page-indicator">Страница 1 из 2 ✨</div>
+            </div>
+
+            <!-- СТРАНИЦА 1 -->
+            <div id="page-1">
+                <div class="hero-header">
+                    <h1>С Днём Рождения, Raiana! 🌸</h1>
+                    <p>Этот праздник посвящён тебе. Листай ниже — здесь спрятаны тёплые слова и сюрпризы специально для тебя!</p>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">Письмо для тебя 💌</div>
+                    <div class="envelope-box" onclick="openEnvelope()">
+                        <span class="envelope-icon" id="env-icon">✉️</span>
+                        <div id="env-prompt" style="font-weight: 600; color: var(--rose);">Нажми на конверт, чтобы открыть</div>
+                        <div id="letter-body" class="letter-content hidden">
+                            Дорогая <b>Raiana</b>! ✨<br><br>
+                            С днём рождения тебя! Хочу пожелать, чтобы в твоей жизни всегда было место для самых тёплых эмоций, искреннего смеха и людей, которые ценят тебя так же сильно, как я.<br><br>
+                            Ты невероятно светлый, добрый и особенный человек. Пусть каждая твоя мечта сбывается легко и красиво, а впереди ждёт множество поводов улыбаться! 💖
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card cake-area">
+                    <div class="section-title">Загадай желание 🎂</div>
+                    <p class="section-sub">Закрой глаза, загадай самое заветное желание и нажми на тортик, чтобы задуть свечки!</p>
+                    
+                    <div class="cake-visual" onclick="blowCandles()">
+                        <div class="candles">
+                            <div class="candle"><div class="flame"></div></div>
+                            <div class="candle"><div class="flame"></div></div>
+                            <div class="candle"><div class="flame"></div></div>
+                        </div>
+                        <div class="cake-tier-top"></div>
+                        <div class="cake-tier-bottom"></div>
+                    </div>
+                    <div id="cake-status" style="font-size: 0.85rem; color: var(--gold); font-weight: 500;">✨ Свечки горят... нажми на торт!</div>
+                </div>
+
+                <div class="section-card" style="text-align: center;">
+                    <div class="section-title">Почему ты самая лучшая ✨</div>
+                    <div class="compliment-display" id="compliment-text">
+                        Нажми на кнопку ниже, чтобы вытянуть милую записку 💖
+                    </div>
+                    <button class="cute-btn" onclick="nextCompliment()">Вытянуть ещё одну записку 🌸</button>
+                </div>
+
+                <div class="next-page-banner">
+                    <div style="font-size: 1.8rem; margin-bottom: 6px;">🎁✨</div>
+                    <h2 style="font-family: Georgia, serif; font-size: 1.65rem; color: var(--gold); margin-bottom: 8px;">
+                        Но это ещё не всё!
+                    </h2>
+                    <p style="font-size: 0.9rem; color: rgba(255,255,255,0.85); margin-bottom: 18px;">
+                        На второй странице тебя ждут печенье с предсказанием, капсула желаний и место для твоих впечатлений.
+                    </p>
+                    <button class="cute-btn" onclick="goToPage(2)">Перейти на 2-ю страницу ✨ →</button>
+                </div>
+            </div>
+
+            <!-- СТРАНИЦА 2 -->
+            <div id="page-2" class="hidden">
+                <div style="margin-bottom: 18px;">
+                    <button class="nav-small-btn" onclick="goToPage(1)">← Вернуться на 1-ю страницу</button>
+                </div>
+
+                <div class="hero-header">
+                    <h1>Волшебная комната ✨</h1>
+                    <p>Загляни в будущее, запечатай свою главную мечту и оставь свой след на память!</p>
+                </div>
+
+                <div class="section-card" style="text-align: center;">
+                    <div class="section-title">Печенье с предсказанием 🥠</div>
+                    <p class="section-sub">Нажми на печеньку, чтобы разломить её и узнать, что приятного тебя ждёт!</p>
+
+                    <div class="cookie-stage">
+                        <div class="cookie-visual" id="cookie-box" onclick="crackCookie()">
+                            <span class="cookie-half cookie-left">🥠</span>
+                            <span class="cookie-half cookie-right" style="transform: scaleX(-1);">🥠</span>
+                        </div>
+
+                        <div id="fortune-paper" class="fortune-slip hidden"></div>
+
+                        <button class="cute-btn" id="cookie-btn" onclick="crackCookie()">Разломить печеньку ✨</button>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">Капсула желаний 🕯️</div>
+                    <p class="section-sub">
+                        Напиши своё главное желание, цель или послание самой себе. Нажми «Запечатать», и оно превратится в памятный свиток!
+                    </p>
+
+                    <div id="capsule-form">
+                        <textarea id="capsule-text" class="capsule-input" placeholder="Например: Я хочу научиться..., побывать в... и быть самой счастливой! ✨"></textarea>
+                        <div style="text-align: center;">
+                            <button class="cute-btn" onclick="sealCapsule()">Запечатать в капсулу 🕯️</button>
+                        </div>
+                    </div>
+
+                    <div id="capsule-result" class="sealed-scroll hidden">
+                        <div class="wax-seal">💖</div>
+                        <div style="font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold);">
+                            Капсула желаний Raiana • Запечатано
+                        </div>
+                        <div class="scroll-text" id="saved-wish-text"></div>
+                        <div style="font-size: 0.78rem; color: rgba(255,255,255,0.65); margin-bottom: 14px;">
+                            Сохранено на этом устройстве ✨
+                        </div>
+                        <button class="nav-small-btn" onclick="editCapsule()">Изменить текст ✏️</button>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">Твой отзыв на сюрприз 💌</div>
+                    <p class="section-sub">Оцени это поздравление и напиши пару слов — всё автоматически сохранится на память!</p>
+
+                    <div id="review-form">
+                        <div class="hearts-rating">
+                            <span class="rate-heart active" onclick="setRating(1)">💖</span>
+                            <span class="rate-heart active" onclick="setRating(2)">💖</span>
+                            <span class="rate-heart active" onclick="setRating(3)">💖</span>
+                            <span class="rate-heart active" onclick="setRating(4)">💖</span>
+                            <span class="rate-heart active" onclick="setRating(5)">💖</span>
+                        </div>
+
+                        <div class="mood-tags">
+                            <div class="mood-tag selected" onclick="toggleTag(this)">Очень мило 🥺</div>
+                            <div class="mood-tag" onclick="toggleTag(this)">Улыбнулась до ушей 😊</div>
+                            <div class="mood-tag" onclick="toggleTag(this)">Салют топ! 🎆</div>
+                            <div class="mood-tag" onclick="toggleTag(this)">Мишка супер 🧸</div>
+                        </div>
+
+                        <textarea id="review-text" class="capsule-input" style="min-height: 75px;" placeholder="Напиши свои впечатления здесь..."></textarea>
+
+                        <div style="text-align: center;">
+                            <button class="cute-btn" onclick="submitReview()">Сохранить отзыв ✨</button>
+                        </div>
+                    </div>
+
+                    <div id="review-result" class="review-card-result hidden">
+                        <div style="font-size: 1.6rem; margin-bottom: 6px;" id="res-hearts">💖💖💖💖💖</div>
+                        <div style="font-weight: 700; color: var(--gold); margin-bottom: 8px;" id="res-tags"></div>
+                        <p style="font-size: 0.95rem; color: #fff; line-height: 1.55; margin-bottom: 14px;" id="res-comment"></p>
+                        <div style="font-size: 0.78rem; color: var(--rose);">Отзыв сохранён и отправлен автору! ✨</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- СТРАНИЦА 1 -->
-        <div id="page-1">
-            <div class="hero-header">
-                <h1>С Днём Рождения, Раяна! 🌸</h1>
-                <p>Этот праздник посвящён тебе. Листай ниже — здесь спрятаны тёплые слова и сюрпризы специально для тебя!</p>
-            </div>
-
-            <div class="section-card">
-                <div class="section-title">Письмо для тебя 💌</div>
-                <div class="envelope-box" onclick="openEnvelope()">
-                    <span class="envelope-icon" id="env-icon">✉️</span>
-                    <div id="env-prompt" style="font-weight: 600; color: var(--rose);">Нажми на конверт, чтобы открыть</div>
-                    <div id="letter-body" class="letter-content hidden">
-                        Дорогая <b>Раяна</b>! ✨<br><br>
-                        С днём рождения тебя! Хочу пожелать, чтобы в твоей жизни всегда было место для самых тёплых эмоций, искреннего смеха и людей, которые ценят тебя сильно.<br><br>
-                        Ты невероятно светлый, добрый и особенный человек. Пусть каждая твоя мечта сбывается легко и красиво, а впереди ждёт множество поводов улыбаться! 💖
-                    </div>
-                </div>
-            </div>
-
-            <div class="section-card cake-area">
-                <div class="section-title">Загадай желание 🎂</div>
-                <p class="section-sub">Закрой глаза, загадай самое заветное желание и нажми на тортик, чтобы задуть свечки!</p>
-                
-                <div class="cake-visual" onclick="blowCandles()">
-                    <div class="candles">
-                        <div class="candle"><div class="flame"></div></div>
-                        <div class="candle"><div class="flame"></div></div>
-                        <div class="candle"><div class="flame"></div></div>
-                    </div>
-                    <div class="cake-tier-top"></div>
-                    <div class="cake-tier-bottom"></div>
-                </div>
-                <div id="cake-status" style="font-size: 0.85rem; color: var(--gold); font-weight: 500;">✨ Свечки горят... нажми на торт!</div>
-            </div>
-
-            <div class="section-card" style="text-align: center;">
-                <div class="section-title">Почему ты самая лучшая ✨</div>
-                <div class="compliment-display" id="compliment-text">
-                    Нажми на кнопку ниже, чтобы вытянуть милую записку 💖
-                </div>
-                <button class="cute-btn" onclick="nextCompliment()">Вытянуть ещё одну записку 🌸</button>
-            </div>
-
-            <div class="next-page-banner">
-                <div style="font-size: 1.8rem; margin-bottom: 6px;">🎁✨</div>
-                <h2 style="font-family: Georgia, serif; font-size: 1.65rem; color: var(--gold); margin-bottom: 8px;">
-                    Но это ещё не всё!
-                </h2>
-                <p style="font-size: 0.9rem; color: rgba(255,255,255,0.85); margin-bottom: 18px;">
-                    На второй странице тебя ждут печенье с предсказанием, капсула желаний и место для твоих впечатлений.
-                </p>
-                <button class="cute-btn" onclick="goToPage(2)">Перейти на 2-ю страницу ✨ →</button>
-            </div>
-        </div>
-
-        <!-- СТРАНИЦА 2 -->
-        <div id="page-2" class="hidden">
-            <div style="margin-bottom: 18px;">
-                <button class="nav-small-btn" onclick="goToPage(1)">← Вернуться на 1-ю страницу</button>
-            </div>
-
-            <div class="hero-header">
-                <h1>Волшебная комната ✨</h1>
-                <p>Загляни в будущее, запечатай свою главную мечту и оставь свой след на память!</p>
-            </div>
-
-            <div class="section-card" style="text-align: center;">
-                <div class="section-title">Печенье с предсказанием 🥠</div>
-                <p class="section-sub">Нажми на печеньку, чтобы разломить её и узнать, что приятного тебя ждёт!</p>
-
-                <div class="cookie-stage">
-                    <div class="cookie-visual" id="cookie-box" onclick="crackCookie()">
-                        <span class="cookie-half cookie-left">🥠</span>
-                        <span class="cookie-half cookie-right" style="transform: scaleX(-1);">🥠</span>
-                    </div>
-
-                    <div id="fortune-paper" class="fortune-slip hidden"></div>
-
-                    <button class="cute-btn" id="cookie-btn" onclick="crackCookie()">Разломить печеньку ✨</button>
-                </div>
-            </div>
-
-            <div class="section-card">
-                <div class="section-title">Капсула желаний 🕯️</div>
-                <p class="section-sub">
-                    Напиши своё главное желание, цель или послание самой себе. Нажми «Запечатать», и оно превратится в памятный свиток!
-                </p>
-
-                <div id="capsule-form">
-                    <textarea id="capsule-text" class="capsule-input" placeholder="Например: Я хочу научиться..., побывать в... и быть самой счастливой! ✨"></textarea>
-                    <div style="text-align: center;">
-                        <button class="cute-btn" onclick="sealCapsule()">Запечатать в капсулу 🕯️</button>
-                    </div>
-                </div>
-
-                <div id="capsule-result" class="sealed-scroll hidden">
-                    <div class="wax-seal">💖</div>
-                    <div style="font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold);">
-                        Капсула желаний Раяны • Запечатано
-                    </div>
-                    <div class="scroll-text" id="saved-wish-text"></div>
-                    <div style="font-size: 0.78rem; color: rgba(255,255,255,0.65); margin-bottom: 14px;">
-                        Запечатано ✨
-                    </div>
-                    <button class="nav-small-btn" onclick="editCapsule()">Изменить текст ✏️</button>
-                </div>
-            </div>
-
-            <div class="section-card">
-                <div class="section-title">Твой отзыв на сюрприз 💌</div>
-                <p class="section-sub">Оцени это поздравление!</p>
-
-                <div id="review-form">
-                    <div class="hearts-rating">
-                        <span class="rate-heart active" onclick="setRating(1)">💖</span>
-                        <span class="rate-heart active" onclick="setRating(2)">💖</span>
-                        <span class="rate-heart active" onclick="setRating(3)">💖</span>
-                        <span class="rate-heart active" onclick="setRating(4)">💖</span>
-                        <span class="rate-heart active" onclick="setRating(5)">💖</span>
-                    </div>
-
-                    <div class="mood-tags">
-                        <div class="mood-tag selected" onclick="toggleTag(this)">Очень мило 🥺</div>
-                        <div class="mood-tag" onclick="toggleTag(this)">Улыбнулась до ушей 😊</div>
-                        <div class="mood-tag" onclick="toggleTag(this)">Салют топ! 🎆</div>
-                        <div class="mood-tag" onclick="toggleTag(this)">Мишка супер 🧸</div>
-                    </div>
-
-                    <textarea id="review-text" class="capsule-input" style="min-height: 75px;" placeholder="Напиши свои впечатления здесь..."></textarea>
-
-                    <div style="text-align: center;">
-                        <button class="cute-btn" onclick="submitReview()">Сохранить отзыв ✨</button>
-                    </div>
-                </div>
-
-                <div id="review-result" class="review-card-result hidden">
-                    <div style="font-size: 1.6rem; margin-bottom: 6px;" id="res-hearts">💖💖💖💖💖</div>
-                    <div style="font-weight: 700; color: var(--gold); margin-bottom: 8px;" id="res-tags"></div>
-                    <p style="font-size: 0.95rem; color: #fff; line-height: 1.55; margin-bottom: 14px;" id="res-comment"></p>
-                    <div style="font-size: 0.78rem; color: var(--rose);">Отзыв сохранён и отправлен автору! ✨</div>
-                </div>
-            </div>
-        </div>
+        <!-- ПРАВАЯ КОЛОНКА ФОТО -->
+        <div class="side-photos side-right" id="right-photos"></div>
     </div>
 
     <script>
         var FORMSPREE_URL = "https://formspree.io/f/xgaknorp";
         var STORAGE_KEY = "raiana_birthday_device_state_v1";
 
-        // Локальное состояние конкретного устройства (iPad / телефон)
+        // ========================================================
+        // НАСТРОЙКА ФОТОГРАФИЙ (3 ФОТО НА 1-Й СТРАНИЦЕ И 3 НА 2-Й)
+        // Загрузи файлы photo1.jpg ... photo6.jpg в репозиторий GitHub
+        // ========================================================
+        var page1Photos = [
+            { src: "photo1.jpg", caption: "Самая яркая ✨" },
+            { src: "photo2.jpg", caption: "Лучшие моменты 🌸" },
+            { src: "photo3.jpg", caption: "Улыбка на миллион 💖" }
+        ];
+
+        var page2Photos = [
+            { src: "photo4.jpg", caption: "Невероятная 🦋" },
+            { src: "photo5.jpg", caption: "Сияй всегда ✨" },
+            { src: "photo6.jpg", caption: "С Днём Рождения! 🎉" }
+        ];
+
+        function createPolaroidElement(item) {
+            var card = document.createElement('div');
+            card.className = 'polaroid-card';
+            card.setAttribute('data-src', item.src);
+            card.setAttribute('data-cap', item.caption);
+            card.onclick = function() {
+                openPhotoModal(this.getAttribute('data-src'), this.getAttribute('data-cap'));
+            };
+
+            var img = document.createElement('img');
+            img.src = item.src;
+            img.alt = item.caption;
+            img.onerror = function() {
+                this.onerror = null;
+                this.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><rect width='100%' height='100%' fill='%232a143d'/><text x='50%' y='50%' fill='%23ff9ebb' font-family='sans-serif' font-size='18' text-anchor='middle' dy='.3em'>" + this.alt + "</text></svg>";
+            };
+
+            var cap = document.createElement('div');
+            cap.className = 'polaroid-caption';
+            cap.textContent = item.caption;
+
+            card.appendChild(img);
+            card.appendChild(cap);
+            return card;
+        }
+
+        function renderSidePhotos(pageNum) {
+            var leftBox = document.getElementById('left-photos');
+            var rightBox = document.getElementById('right-photos');
+            var list = (pageNum === 2) ? page2Photos : page1Photos;
+
+            leftBox.classList.add('switching');
+            rightBox.classList.add('switching');
+
+            setTimeout(function() {
+                leftBox.innerHTML = "";
+                rightBox.innerHTML = "";
+
+                if (pageNum === 1) {
+                    // Страница 1: 2 фото слева, 1 фото справа (итого 3 фото)
+                    leftBox.appendChild(createPolaroidElement(list[0]));
+                    leftBox.appendChild(createPolaroidElement(list[1]));
+                    rightBox.appendChild(createPolaroidElement(list[2]));
+                } else {
+                    // Страница 2: 1 фото слева, 2 фото справа (итого 3 фото)
+                    leftBox.appendChild(createPolaroidElement(list[0]));
+                    rightBox.appendChild(createPolaroidElement(list[1]));
+                    rightBox.appendChild(createPolaroidElement(list[2]));
+                }
+
+                leftBox.classList.remove('switching');
+                rightBox.classList.remove('switching');
+            }, 220);
+        }
+
+        function openPhotoModal(src, caption) {
+            document.getElementById('modal-img').src = src;
+            document.getElementById('modal-cap').textContent = caption;
+            document.getElementById('photo-modal').classList.add('open');
+        }
+
+        function closePhotoModal() {
+            document.getElementById('photo-modal').classList.remove('open');
+        }
+
         var appState = {
             introSeen: false,
             page: 1,
@@ -701,10 +931,11 @@
 
         var compliments = [
             "У тебя самая искренняя и тёплая улыбка, которая сразу поднимает настроение 🌸",
-            "С тобой всегда легко, весело 💖",
+            "С тобой всегда легко, весело и можно быть собой на 100% 💖",
             "Ты умеешь поддержать в нужный момент так, как никто другой ✨",
             "У тебя потрясающее чувство юмора и невероятная энергетика 🦋",
-            "Ты делаешь этот мир ярче просто тем, что в нём есть 🌷"
+            "Ты делаешь этот мир ярче просто тем, что в нём есть 🌷",
+            "Каждый наш разговор или прогулка превращается в классное воспоминание 💫"
         ];
 
         var fortunes = [
@@ -716,7 +947,6 @@
             "Удача будет твоим главным спутником во всех начинаниях 🦋"
         ];
 
-        // Восстановление сохранённых данных при повторном входе с того же устройства
         function applySavedState() {
             if (appState.envelopeOpen) {
                 document.getElementById('letter-body').classList.remove('hidden');
@@ -766,10 +996,13 @@
                 document.getElementById('page-1').classList.add('hidden');
                 document.getElementById('page-2').classList.remove('hidden');
                 document.getElementById('page-indicator').textContent = 'Страница 2 из 2 • Сюрпризы ✨';
+                renderSidePhotos(2);
+            } else {
+                renderSidePhotos(1);
             }
 
             if (appState.introSeen) {
-                bearSay("С возвращением, Раяна!✨");
+                bearSay("С возвращением, Raiana! 🧸 Все твои пожелания и фото сохранены ✨");
             }
         }
 
@@ -790,7 +1023,6 @@
                 container.appendChild(el);
             }
 
-            // Салют показывается только при самом первом входе на этом устройстве
             if (!appState.introSeen) {
                 appState.introSeen = true;
                 saveState();
@@ -871,11 +1103,13 @@
             appState.page = pageNum;
             saveState();
 
+            renderSidePhotos(pageNum);
+
             if (pageNum === 2) {
                 p1.classList.add('hidden');
                 p2.classList.remove('hidden');
                 indicator.textContent = 'Страница 2 из 2 • Сюрпризы ✨';
-                bearSay("Ого, мы на второй странице! Попробуй разломить печеньку с предсказанием 🥠");
+                bearSay("Смотри, и фотки обновились! Попробуй разломить печеньку 🥠");
             } else {
                 p2.classList.add('hidden');
                 p1.classList.remove('hidden');
@@ -888,7 +1122,7 @@
         function openEnvelope() {
             document.getElementById('letter-body').classList.remove('hidden');
             document.getElementById('env-icon').textContent = '💖';
-            document.getElementById('env-prompt').textContent = 'Для тебя, Раяна ✨';
+            document.getElementById('env-prompt').textContent = 'Для тебя, Raiana ✨';
             appState.envelopeOpen = true;
             saveState();
         }
@@ -933,14 +1167,14 @@
             document.getElementById('capsule-form').classList.add('hidden');
             document.getElementById('saved-wish-text').textContent = "«" + val + "»";
             document.getElementById('capsule-result').classList.remove('hidden');
-            bearSay("Капсула надёжно запечатана! 🕯️✨");
+            bearSay("Капсула надёжно запечатана на этом устройстве! 🕯️✨");
 
             appState.capsuleSealed = true;
             appState.capsuleText = val;
             saveState();
 
             sendToMail({
-                Раздел: "🕯️ Капсула желаний",
+                Раздел: "🕯️ Капсула желаний Raiana",
                 Желание: val
             });
         }
@@ -983,7 +1217,7 @@
 
             document.getElementById('review-form').classList.add('hidden');
             document.getElementById('review-result').classList.remove('hidden');
-            bearSay("Ура!");
+            bearSay("Ура! Отзыв сохранён и отправлен автору 📸");
 
             appState.reviewSubmitted = true;
             appState.tags = tagNames;
@@ -991,7 +1225,7 @@
             saveState();
 
             sendToMail({
-                Раздел: "💌 Отзыв на поздравление",
+                Раздел: "💌 Отзыв Raiana на поздравление",
                 Оценка: appState.rating + " из 5 (" + heartsStr + ")",
                 Эмоции: tagsText,
                 Комментарий: comment
@@ -999,9 +1233,9 @@
         }
 
         var bearPhrases = [
-            "Ты сегодня просто светишься от красоты, Раяна! ✨",
+            "Ты сегодня просто светишься от красоты, Raiana! ✨",
             "Этот мир намного светлее и добрее, потому что в нём есть ты 🌸",
-            "Не забудь заглянуть на вторую страницу — там печеньки с предсказаниями! 🥠",
+            "Нажми на любую фотку по бокам, чтобы открыть её крупно 📸",
             "Если нажать на меня ещё раз, я скажу ещё один комплимент 🧸💕",
             "Пусть вокруг всегда будет много твоих любимых вкусняшек и искреннего смеха 🍓",
             "Ты заслуживаешь самого волшебного дня рождения! 👑"
