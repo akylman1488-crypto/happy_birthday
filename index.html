@@ -604,7 +604,7 @@
                     </div>
                     <div class="scroll-text" id="saved-wish-text"></div>
                     <div style="font-size: 0.78rem; color: rgba(255,255,255,0.65); margin-bottom: 14px;">
-                        Сделай скриншот этого свитка на память ✨
+                        Сохранено на этом устройстве ✨
                     </div>
                     <button class="nav-small-btn" onclick="editCapsule()">Изменить текст ✏️</button>
                 </div>
@@ -649,6 +649,42 @@
 
     <script>
         var FORMSPREE_URL = "https://formspree.io/f/xgaknorp";
+        var STORAGE_KEY = "raiana_birthday_device_state_v1";
+
+        // Локальное состояние конкретного устройства (iPad / телефон)
+        var appState = {
+            introSeen: false,
+            page: 1,
+            envelopeOpen: false,
+            candlesBlown: false,
+            compIndex: 0,
+            fortuneText: "",
+            fortuneIndex: 0,
+            capsuleSealed: false,
+            capsuleText: "",
+            reviewSubmitted: false,
+            rating: 5,
+            tags: ["Очень мило 🥺"],
+            reviewComment: ""
+        };
+
+        function loadState() {
+            try {
+                var raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    var parsed = JSON.parse(raw);
+                    for (var k in parsed) {
+                        if (parsed.hasOwnProperty(k)) appState[k] = parsed[k];
+                    }
+                }
+            } catch (e) {}
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (e) {}
+        }
 
         function sendToMail(payload) {
             try {
@@ -663,7 +699,85 @@
             } catch (e) {}
         }
 
+        var compliments = [
+            "У тебя самая искренняя и тёплая улыбка, которая сразу поднимает настроение 🌸",
+            "С тобой всегда легко, весело и можно быть собой на 100% 💖",
+            "Ты умеешь поддержать в нужный момент так, как никто другой ✨",
+            "У тебя потрясающее чувство юмора и невероятная энергетика 🦋",
+            "Ты делаешь этот мир ярче просто тем, что в нём есть 🌷",
+            "Каждый наш разговор или прогулка превращается в классное воспоминание 💫"
+        ];
+
+        var fortunes = [
+            "Совсем скоро тебя ждёт событие, от которого ты будешь сиять от счастья! ✨",
+            "Твоя самая смелая мечта уже нашла дорогу к тебе — просто верь в себя 💖",
+            "Впереди тебя ждёт море новых ярких впечатлений и крутых побед 🌟",
+            "Рядом с тобой всегда будут люди, которые искренне ценят и берегут тебя 🌸",
+            "Готовься к неожиданному и очень приятному сюрпризу в самом ближайшем будущем! 🎁",
+            "Удача будет твоим главным спутником во всех начинаниях 🦋"
+        ];
+
+        // Восстановление сохранённых данных при повторном входе с того же устройства
+        function applySavedState() {
+            if (appState.envelopeOpen) {
+                document.getElementById('letter-body').classList.remove('hidden');
+                document.getElementById('env-icon').textContent = '💖';
+                document.getElementById('env-prompt').textContent = 'Для тебя, Raiana ✨';
+            }
+
+            if (appState.candlesBlown) {
+                var flames = document.querySelectorAll('.flame');
+                for (var i = 0; i < flames.length; i++) {
+                    flames[i].classList.add('blown');
+                }
+                document.getElementById('cake-status').textContent = '🎉 Желание загадано и обязательно сбудется!';
+            }
+
+            if (appState.compIndex > 0) {
+                var prevIdx = (appState.compIndex - 1 + compliments.length) % compliments.length;
+                document.getElementById('compliment-text').textContent = compliments[prevIdx];
+            }
+
+            if (appState.fortuneText) {
+                document.getElementById('cookie-box').classList.add('cracked');
+                var paper = document.getElementById('fortune-paper');
+                paper.textContent = appState.fortuneText;
+                paper.classList.remove('hidden');
+                document.getElementById('cookie-btn').textContent = 'Открыть ещё одну печеньку 🥠';
+            }
+
+            if (appState.capsuleSealed && appState.capsuleText) {
+                document.getElementById('capsule-text').value = appState.capsuleText;
+                document.getElementById('capsule-form').classList.add('hidden');
+                document.getElementById('saved-wish-text').textContent = "«" + appState.capsuleText + "»";
+                document.getElementById('capsule-result').classList.remove('hidden');
+            }
+
+            if (appState.reviewSubmitted) {
+                var heartsStr = '';
+                for (var j = 0; j < appState.rating; j++) heartsStr += '💖';
+                document.getElementById('res-hearts').textContent = heartsStr;
+                document.getElementById('res-tags').textContent = appState.tags.length ? appState.tags.join(' • ') : 'Праздничное настроение ✨';
+                document.getElementById('res-comment').textContent = "«" + appState.reviewComment + "»";
+                document.getElementById('review-form').classList.add('hidden');
+                document.getElementById('review-result').classList.remove('hidden');
+            }
+
+            if (appState.page === 2) {
+                document.getElementById('page-1').classList.add('hidden');
+                document.getElementById('page-2').classList.remove('hidden');
+                document.getElementById('page-indicator').textContent = 'Страница 2 из 2 • Сюрпризы ✨';
+            }
+
+            if (appState.introSeen) {
+                bearSay("С возвращением, Raiana! 🧸 Все твои пожелания и сюрпризы сохранены ✨");
+            }
+        }
+
         (function() {
+            loadState();
+            applySavedState();
+
             var container = document.getElementById('ambient-particles');
             var symbols = ['💖', '✨', '🌸', '💫', '🤍', '🦋'];
             for (var i = 0; i < 20; i++) {
@@ -677,71 +791,77 @@
                 container.appendChild(el);
             }
 
-            var overlay = document.getElementById('intro-overlay');
-            var canvas = document.getElementById('fireworks-canvas');
-            if (overlay && canvas && canvas.getContext) {
-                overlay.classList.add('active');
-                var ctx = canvas.getContext('2d');
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+            // Салют показывается только при самом первом входе на этом устройстве
+            if (!appState.introSeen) {
+                appState.introSeen = true;
+                saveState();
 
-                var particles = [];
-                var colors = ['#ff6b9d', '#ffd166', '#ff9ebb', '#cdb4db', '#72efdd', '#ffffff'];
+                var overlay = document.getElementById('intro-overlay');
+                var canvas = document.getElementById('fireworks-canvas');
+                if (overlay && canvas && canvas.getContext) {
+                    overlay.classList.add('active');
+                    var ctx = canvas.getContext('2d');
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
 
-                function spawnFirework(x, y) {
-                    var color = colors[Math.floor(Math.random() * colors.length)];
-                    for (var i = 0; i < 50; i++) {
-                        var angle = (Math.PI * 2 * i) / 50;
-                        var speed = 2 + Math.random() * 5;
-                        particles.push({
-                            x: x, y: y,
-                            vx: Math.cos(angle) * speed,
-                            vy: Math.sin(angle) * speed,
-                            alpha: 1,
-                            color: color,
-                            size: 2.5
-                        });
+                    var particles = [];
+                    var colors = ['#ff6b9d', '#ffd166', '#ff9ebb', '#cdb4db', '#72efdd', '#ffffff'];
+
+                    function spawnFirework(x, y) {
+                        var color = colors[Math.floor(Math.random() * colors.length)];
+                        for (var i = 0; i < 50; i++) {
+                            var angle = (Math.PI * 2 * i) / 50;
+                            var speed = 2 + Math.random() * 5;
+                            particles.push({
+                                x: x, y: y,
+                                vx: Math.cos(angle) * speed,
+                                vy: Math.sin(angle) * speed,
+                                alpha: 1,
+                                color: color,
+                                size: 2.5
+                            });
+                        }
                     }
-                }
 
-                var fwInterval = setInterval(function() {
-                    spawnFirework(canvas.width * (0.2 + Math.random() * 0.6), canvas.height * (0.2 + Math.random() * 0.4));
-                }, 500);
+                    var fwInterval = setInterval(function() {
+                        spawnFirework(canvas.width * (0.2 + Math.random() * 0.6), canvas.height * (0.2 + Math.random() * 0.4));
+                    }, 500);
 
-                spawnFirework(canvas.width * 0.3, canvas.height * 0.35);
-                spawnFirework(canvas.width * 0.7, canvas.height * 0.35);
+                    spawnFirework(canvas.width * 0.3, canvas.height * 0.35);
+                    spawnFirework(canvas.width * 0.7, canvas.height * 0.35);
 
-                var running = true;
-                function animate() {
-                    if (!running) return;
-                    ctx.fillStyle = 'rgba(10, 4, 20, 0.25)';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    for (var i = particles.length - 1; i >= 0; i--) {
-                        var p = particles[i];
-                        p.x += p.vx;
-                        p.y += p.vy;
-                        p.vy += 0.06;
-                        p.alpha -= 0.018;
-                        if (p.alpha <= 0) { particles.splice(i, 1); continue; }
-                        ctx.globalAlpha = p.alpha;
-                        ctx.fillStyle = p.color;
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                        ctx.fill();
+                    var running = true;
+                    function animate() {
+                        if (!running) return;
+                        ctx.fillStyle = 'rgba(10, 4, 20, 0.25)';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        for (var i = particles.length - 1; i >= 0; i--) {
+                            var p = particles[i];
+                            p.x += p.vx;
+                            p.y += p.vy;
+                            p.vy += 0.06;
+                            p.alpha -= 0.018;
+                            if (p.alpha <= 0) { particles.splice(i, 1); continue; }
+                            ctx.globalAlpha = p.alpha;
+                            ctx.fillStyle = p.color;
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                        ctx.globalAlpha = 1;
+                        requestAnimationFrame(animate);
                     }
-                    ctx.globalAlpha = 1;
-                    requestAnimationFrame(animate);
-                }
-                animate();
+                    animate();
 
-                setTimeout(function() {
-                    clearInterval(fwInterval);
-                    overlay.classList.add('fade-out');
                     setTimeout(function() {
-                        running = false;
-                        overlay.classList.remove('active');
-                    }, 1350);
-                }, 3800);
+                        clearInterval(fwInterval);
+                        overlay.classList.add('fade-out');
+                        setTimeout(function() {
+                            running = false;
+                            overlay.classList.remove('active');
+                        }, 1350);
+                    }, 3800);
+                }
             }
         })();
 
@@ -749,6 +869,9 @@
             var p1 = document.getElementById('page-1');
             var p2 = document.getElementById('page-2');
             var indicator = document.getElementById('page-indicator');
+            appState.page = pageNum;
+            saveState();
+
             if (pageNum === 2) {
                 p1.classList.add('hidden');
                 p2.classList.remove('hidden');
@@ -767,6 +890,8 @@
             document.getElementById('letter-body').classList.remove('hidden');
             document.getElementById('env-icon').textContent = '💖';
             document.getElementById('env-prompt').textContent = 'Для тебя, Raiana ✨';
+            appState.envelopeOpen = true;
+            saveState();
         }
 
         function blowCandles() {
@@ -776,39 +901,27 @@
             }
             document.getElementById('cake-status').textContent = '🎉 Ура! Желание загадано и обязательно сбудется!';
             bearSay("Я видел, как ты загадала желание! Оно точно исполнится 🌟");
+            appState.candlesBlown = true;
+            saveState();
         }
 
-        var compliments = [
-            "У тебя самая искренняя и тёплая улыбка, которая сразу поднимает настроение 🌸",
-            "С тобой всегда легко, весело и можно быть собой на 100% 💖",
-            "Ты умеешь поддержать в нужный момент так, как никто другой ✨",
-            "У тебя потрясающее чувство юмора и невероятная энергетика 🦋",
-            "Ты делаешь этот мир ярче просто тем, что в нём есть 🌷",
-            "Каждый наш разговор или прогулка превращается в классное воспоминание 💫"
-        ];
-        var compIndex = 0;
         function nextCompliment() {
-            document.getElementById('compliment-text').textContent = compliments[compIndex];
-            compIndex = (compIndex + 1) % compliments.length;
+            document.getElementById('compliment-text').textContent = compliments[appState.compIndex];
+            appState.compIndex = (appState.compIndex + 1) % compliments.length;
+            saveState();
         }
 
-        var fortunes = [
-            "Совсем скоро тебя ждёт событие, от которого ты будешь сиять от счастья! ✨",
-            "Твоя самая смелая мечта уже нашла дорогу к тебе — просто верь в себя 💖",
-            "Впереди тебя ждёт море новых ярких впечатлений и крутых побед 🌟",
-            "Рядом с тобой всегда будут люди, которые искренне ценят и берегут тебя 🌸",
-            "Готовься к неожиданному и очень приятному сюрпризу в самом ближайшем будущем! 🎁",
-            "Удача будет твоим главным спутником во всех начинаниях 🦋"
-        ];
-        var fortuneIndex = 0;
         function crackCookie() {
             var box = document.getElementById('cookie-box');
             var paper = document.getElementById('fortune-paper');
+            var text = "«" + fortunes[appState.fortuneIndex] + "»";
             box.classList.add('cracked');
-            paper.textContent = "«" + fortunes[fortuneIndex] + "»";
-            fortuneIndex = (fortuneIndex + 1) % fortunes.length;
+            paper.textContent = text;
+            appState.fortuneText = text;
+            appState.fortuneIndex = (appState.fortuneIndex + 1) % fortunes.length;
             paper.classList.remove('hidden');
             document.getElementById('cookie-btn').textContent = 'Открыть ещё одну печеньку 🥠';
+            saveState();
         }
 
         function sealCapsule() {
@@ -821,7 +934,11 @@
             document.getElementById('capsule-form').classList.add('hidden');
             document.getElementById('saved-wish-text').textContent = "«" + val + "»";
             document.getElementById('capsule-result').classList.remove('hidden');
-            bearSay("Капсула надёжно запечатана! 🕯️✨");
+            bearSay("Капсула надёжно запечатана на этом устройстве! 🕯️✨");
+
+            appState.capsuleSealed = true;
+            appState.capsuleText = val;
+            saveState();
 
             sendToMail({
                 Раздел: "🕯️ Капсула желаний Raiana",
@@ -832,16 +949,18 @@
         function editCapsule() {
             document.getElementById('capsule-result').classList.add('hidden');
             document.getElementById('capsule-form').classList.remove('hidden');
+            appState.capsuleSealed = false;
+            saveState();
         }
 
-        var currentRating = 5;
         function setRating(n) {
-            currentRating = n;
+            appState.rating = n;
             var hearts = document.querySelectorAll('.rate-heart');
             for (var i = 0; i < hearts.length; i++) {
                 if (i < n) hearts[i].classList.add('active');
                 else hearts[i].classList.remove('active');
             }
+            saveState();
         }
 
         function toggleTag(el) {
@@ -855,7 +974,7 @@
             for (var i = 0; i < tags.length; i++) tagNames.push(tags[i].textContent);
 
             var heartsStr = '';
-            for (var j = 0; j < currentRating; j++) heartsStr += '💖';
+            for (var j = 0; j < appState.rating; j++) heartsStr += '💖';
 
             var tagsText = tagNames.length ? tagNames.join(' • ') : 'Праздничное настроение ✨';
 
@@ -867,9 +986,14 @@
             document.getElementById('review-result').classList.remove('hidden');
             bearSay("Ура! Отзыв сохранён и отправлен автору 📸");
 
+            appState.reviewSubmitted = true;
+            appState.tags = tagNames;
+            appState.reviewComment = comment;
+            saveState();
+
             sendToMail({
                 Раздел: "💌 Отзыв Raiana на поздравление",
-                Оценка: currentRating + " из 5 (" + heartsStr + ")",
+                Оценка: appState.rating + " из 5 (" + heartsStr + ")",
                 Эмоции: tagsText,
                 Комментарий: comment
             });
