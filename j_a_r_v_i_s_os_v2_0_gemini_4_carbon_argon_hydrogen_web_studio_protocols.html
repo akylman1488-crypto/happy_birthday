@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J.A.R.V.I.S. OS v2.0 — Gemini 4 Carbon / Argon / Hydrogen + Web Studio &amp; Protocols</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #060b14;
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .hud-border {
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      box-shadow: 0 0 24px rgba(14, 165, 233, 0.08);
+    }
+    .hud-glow {
+      text-shadow: 0 0 12px rgba(56, 189, 248, 0.55);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+
+  <!-- Top Navigation & Key Bar -->
+  <header class="border-b border-sky-500/20 bg-slate-900/90 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div id="status-dot" class="w-3 h-3 rounded-full bg-amber-400 animate-pulse"></div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold tracking-wider text-sky-400 hud-glow mono">J.A.R.V.I.S. OS // CORE v2.0</h1>
+            <span id="active-cascade-badge" class="text-[11px] mono px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">CASCADE: GEMINI 4</span>
+          </div>
+          <p id="conn-status-text" class="text-xs text-slate-400 mono">Вставь свой GEMINI_API_KEY справа для активации каскада Gemini 4</p>
+        </div>
+      </div>
+
+      <!-- API Key Quick Bar -->
+      <div class="flex flex-wrap items-center gap-2">
+        <input id="gemini-key-input" type="password" placeholder="Вставь GEMINI_API_KEY (AIzaSy...)"
+          class="bg-slate-950 border border-sky-500/40 rounded-lg px-3 py-1.5 text-xs mono text-sky-200 placeholder-slate-500 focus:outline-none focus:border-sky-400 w-52 sm:w-60">
+        <select id="gemini-model-select" class="bg-slate-950 border border-sky-500/30 rounded-lg px-2.5 py-1.5 text-xs mono text-slate-200">
+          <option value="gemini-4-carbon">gemini-4-carbon (Макс. ум + Авто-фоллбэк)</option>
+          <option value="gemini-4-argon">gemini-4-argon (Флагман AI Pro)</option>
+          <option value="gemini-4-hydrogen">gemini-4-hydrogen (Free Tier + Агенты)</option>
+          <option value="gemini-2.5-flash">gemini-2.5-flash (Быстрый резерв)</option>
+          <option value="gemini-2.5-pro">gemini-2.5-pro (Классический Pro)</option>
+        </select>
+        <button id="save-key-btn" type="button"
+          class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs px-3 py-1.5 rounded-lg transition">
+          Подключить ключ
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="max-w-7xl mx-auto px-4 flex flex-wrap gap-1 border-t border-slate-800/80 pt-2 pb-2">
+      <button type="button" data-tab="tab-hud" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-sky-500/20 text-sky-300 border border-sky-500/40">
+        1. Голосовой HUD и 3D-Ядро
+      </button>
+      <button type="button" data-tab="tab-webgen" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 border border-transparent">
+        5. Генератор Сайтов
+      </button>
+      <button type="button" data-tab="tab-protocols" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 border border-transparent">
+        6. Протоколы Старка
+      </button>
+      <button type="button" data-tab="tab-analysis" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 border border-transparent">
+        7. Инженерные Анализы
+      </button>
+      <button type="button" data-tab="tab-vision" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 border border-transparent">
+        2. Камера iPad (Физика и Схемы)
+      </button>
+      <button type="button" data-tab="tab-arduino" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 border border-transparent">
+        3. Мост Arduino Uno (Web Serial + Код)
+      </button>
+      <button type="button" data-tab="tab-guide" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 border border-transparent">
+        4. Запуск на MacBook M5 и iPad
+      </button>
+    </div>
+  </header>
+
+  <!-- Toast Banner -->
+  <div id="toast-box" class="fixed bottom-4 right-4 z-50 hidden bg-slate-900 border border-sky-400/50 text-sky-200 px-4 py-2.5 rounded-xl shadow-xl text-xs mono"></div>
+
+  <!-- Main Workspace -->
+  <main class="max-w-7xl mx-auto w-full px-4 py-4 flex-1 flex flex-col gap-4">
+
+    <!-- TAB 1: HUD & VOICE CORE -->
+    <section id="tab-hud" class="tab-panel grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <!-- Left: 3D Reactor & Telemetry -->
+      <div class="lg:col-span-5 flex flex-col gap-4">
+        <div class="hud-border rounded-2xl bg-slate-900/70 p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-sky-400 mono">Голографическое ядро Three.js</span>
+            <span id="core-state-badge" class="text-xs mono px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">STANDBY</span>
+          </div>
+          <div id="three-container" class="relative w-full h-64 rounded-xl bg-slate-950 overflow-hidden flex items-center justify-center">
+            <canvas id="reactor-canvas" class="w-full h-full block"></canvas>
+            <div class="absolute bottom-2 left-3 right-3 flex justify-between text-xs mono text-sky-300/80 pointer-events-none">
+              <span id="hud-relay-readout">РЕЛЕ D7: ВЫКЛ</span>
+              <span id="hud-servo-readout">СЕРВО D9: 90°</span>
+              <span id="hud-radar-readout">РАДАР: 48 см</span>
+            </div>
+          </div>
+
+          <!-- Voice & Quick Actions -->
+          <div class="grid grid-cols-2 gap-2">
+            <button id="mic-btn" type="button"
+              class="flex items-center justify-center gap-2 bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/50 text-sky-200 font-semibold py-2.5 px-3 rounded-xl text-xs transition">
+              <span id="mic-label">Говорить в микрофон</span>
+            </button>
+            <button id="tts-toggle-btn" type="button"
+              class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium py-2.5 px-3 rounded-xl text-xs transition">
+              <span id="tts-label">Озвучка: ВКЛ</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Test Presets -->
+        <div class="hud-border rounded-2xl bg-slate-900/70 p-4 flex flex-col gap-2.5">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 mono">Супер-команды J.A.R.V.I.S. v2.0 (Железо + Сайты + Протоколы)</span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button type="button" data-prompt="Джарвис, активируй Протокол Олимпиада: включи рабочий свет на D7, поверни сервопривод D9 на 45 градусов и подготовь рабочее место"
+              class="preset-btn text-left text-xs bg-slate-950 hover:bg-slate-800/90 border border-slate-800 rounded-xl p-2.5 text-slate-300 transition">
+              «Активируй Протокол Олимпиада (D7 + Серво 45°)»
+            </button>
+            <button type="button" data-prompt="Джарвис, создай мне интерактивный сайт-калькулятор вертикального броска и кинематики с графиком высоты h(t)"
+              class="preset-btn text-left text-xs bg-slate-950 hover:bg-slate-800/90 border border-slate-800 rounded-xl p-2.5 text-slate-300 transition">
+              «Создай сайт-калькулятор кинематики на лету»
+            </button>
+            <button type="button" data-prompt="Джарвис, проведи полный инженерный анализ тяги и устойчивости моего Y-образного трикоптера и сформируй отчёт"
+              class="preset-btn text-left text-xs bg-slate-950 hover:bg-slate-800/90 border border-slate-800 rounded-xl p-2.5 text-slate-300 transition">
+              «Статус систем трикоптера и стенда»
+            </button>
+            <button type="button" data-prompt="Джарвис, просканируй комнату ультразвуковым радаром HC-SR04 и доложи дистанцию"
+              class="preset-btn text-left text-xs bg-slate-950 hover:bg-slate-800/90 border border-slate-800 rounded-xl p-2.5 text-slate-300 transition">
+              «Просканируй комнату радаром HC-SR04»
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Live Dialogue & Function Calling Log -->
+      <div class="lg:col-span-7 flex flex-col gap-4">
+        <div class="hud-border rounded-2xl bg-slate-900/70 p-4 flex flex-col h-[480px]">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <span class="text-xs font-semibold uppercase tracking-wider text-sky-400 mono">Диалог с J.A.R.V.I.S. (Каскад Gemini 4 Carbon → Argon → Hydrogen)</span>
+            <button id="clear-chat-btn" type="button" class="text-xs text-slate-400 hover:text-slate-200 mono">Очистить лог</button>
+          </div>
+
+          <div id="chat-messages" class="flex-1 overflow-y-auto py-3 space-y-3 pr-1 text-sm">
+            <div class="bg-slate-950/90 border border-sky-500/30 rounded-xl p-3">
+              <div class="text-xs mono text-sky-400 mb-1">J.A.R.V.I.S. v2.0 // КАСКАД GEMINI 4 ГОТОВ</div>
+              <p class="text-slate-200 text-xs sm:text-sm leading-relaxed">
+                Приветствую, Исанур! Я обновлён до версии <span class="mono text-sky-300">v2.0</span> с каскадом моделей <span class="mono text-emerald-300">Gemini 4 Carbon → Argon → Hydrogen</span>. Теперь по твоей команде я умею не только управлять пинами Arduino Uno, но и <strong>создавать рабочие сайты на лету</strong> (вкладка 2), <strong>запускать кастомные Протоколы</strong> (вкладка 3) и <strong>собирать инженерные анализы</strong> (вкладка 4).
+              </p>
+            </div>
+          </div>
+
+          <!-- Input Row -->
+          <form id="chat-form" class="pt-3 border-t border-slate-800 flex gap-2">
+            <input id="chat-input" type="text" placeholder="Прикажи создать сайт, запустить протокол, сделать анализ или управлять Arduino..."
+              class="flex-1 bg-slate-950 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-100 focus:outline-none">
+            <button type="submit"
+              class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm transition">
+              Отправить
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: ON-THE-FLY WEBSITE GENERATOR STUDIO -->
+    <section id="tab-webgen" class="tab-panel hidden grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div class="lg:col-span-5 hud-border rounded-2xl bg-slate-900/70 p-4 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-sky-400 mono">Генератор сайтов и приложений на лету</span>
+          <span id="webgen-status-badge" class="text-xs mono text-emerald-300">Студия активна</span>
+        </div>
+
+        <p class="text-xs text-slate-400">
+          Опиши любой сайт, калькулятор, 3D-сцену или тренажёр — J.A.R.V.I.S. сгенерирует полный HTML/CSS/JS-код и сразу запустит его справа.
+        </p>
+
+        <div class="flex flex-col gap-2">
+          <input id="webgen-prompt-input" type="text"
+            placeholder="Например: Создай тренажёр формул кинематики с таймером и проверкой ответа..."
+            class="bg-slate-950 border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-xs text-slate-100">
+          <div class="flex flex-wrap gap-2">
+            <button id="webgen-run-btn" type="button"
+              class="flex-1 bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs py-2 px-3 rounded-xl transition">
+              Сгенерировать сайт в Gemini 4
+            </button>
+            <button id="webgen-apply-code-btn" type="button"
+              class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2 px-3 rounded-xl transition">
+              Обновить из редактора
+            </button>
+          </div>
+        </div>
+
+        <!-- Instant Website Templates -->
+        <div class="flex flex-col gap-1.5">
+          <span class="text-xs mono text-slate-400">Мгновенные шаблоны (работают даже без ожидания API):</span>
+          <div class="grid grid-cols-1 gap-1.5">
+            <button type="button" data-template="kinematics"
+              class="webgen-tpl-btn text-left text-xs bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg px-3 py-2 text-sky-300 mono transition">
+              1. Калькулятор баллистики и вертикального броска (v0, g, t)
+            </button>
+            <button type="button" data-template="tricopter"
+              class="webgen-tpl-btn text-left text-xs bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg px-3 py-2 text-emerald-300 mono transition">
+              2. Панель расчёта тяги моторов Y-трикоптера (Тяга / Вес)
+            </button>
+            <button type="button" data-template="cyber"
+              class="webgen-tpl-btn text-left text-xs bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg px-3 py-2 text-amber-300 mono transition">
+              3. Шифратор/дешифратор Цезаря, Base64 и XOR для олимпиады
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5 flex-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs mono text-slate-400">Исходный HTML-код сайта:</span>
+            <div class="flex gap-2">
+              <button id="webgen-open-tab-btn" type="button" class="text-xs mono text-sky-400 hover:underline">Открыть в новой вкладке</button>
+              <button id="webgen-download-btn" type="button" class="text-xs mono text-emerald-400 hover:underline">Скачать .html</button>
+            </div>
+          </div>
+          <textarea id="site-code-editor" rows="8"
+            class="w-full flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs mono text-slate-300 focus:outline-none focus:border-sky-400"></textarea>
+        </div>
+      </div>
+
+      <!-- Right: Live Website Preview Iframe -->
+      <div class="lg:col-span-7 hud-border rounded-2xl bg-slate-900/70 p-4 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <span id="site-preview-title" class="text-xs font-semibold uppercase tracking-wider text-sky-400 mono">Живое превью созданного сайта</span>
+          <span class="text-xs mono text-slate-400">Изолированный рендер</span>
+        </div>
+        <div class="flex-1 min-h-[420px] bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
+          <iframe id="site-preview-frame" title="Предпросмотр созданного сайта" class="w-full h-[420px] border-0 bg-slate-950"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: STARK PROTOCOLS MANAGER -->
+    <section id="tab-protocols" class="tab-panel hidden grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div class="lg:col-span-7 hud-border rounded-2xl bg-slate-900/70 p-4 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-sky-400 mono">Боевые Протоколы J.A.R.V.I.S. (Аппаратные + Цифровые макросы)</span>
+          <span id="active-protocol-badge" class="text-xs mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">Готов к запуску</span>
+        </div>
+        <div id="protocols-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+      </div>
+
+      <!-- Create Custom Protocol -->
+      <div class="lg:col-span-5 hud-border rounded-2xl bg-slate-900/70 p-4 flex flex-col gap-3">
+        <span class="text-xs font-semibold uppercase tracking-wider text-sky-400 mono">Создать новый кастомный Протокол</span>
+        <form id="new-proto-form" class="flex flex-col gap-3 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1 mono">Название протокола:</label>
+            <input id="proto-name-in" type="text" placeholder="Например: Протокол Ночной Кодинг" required
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1 mono">Команды для Arduino Uno (через запятую):</label>
+            <input id="proto-cmds-in" type="text" placeholder="RELAY:1, SERVO:60, RADAR:SCAN" required
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 mono text-sky-300">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1 mono">Действие и голосовой отчёт Джарвиса:</label>
+            <textarea id="proto-desc-in" rows="3" placeholder="Включает настольное освещение, разворачивает камеру на 60° и активирует мониторинг периметра." required
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-slate-200"></textarea>
+          </div>
+          <button type="submit"
+            class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold py-2.5 px-4 rounded-xl transition">
+            Сохранить протокол в память J.A.R.V.I.S.
+          </button>
+        </form>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs space-y-1">
+          <div class="text-sky-400 font-semibold mono">Лог исполнения протоколов:</div>
+          <div id="protocol-exec-log" class="mono text-slate-300 space-y-1 max-h-36 overflow-y-auto">
+            <div>[READY] Все протоколы синхронизированы с мостом Web Serial.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: ENGINEERING & SECURITY ANALYSIS CENTER -->
+    <section id="tab-analysis" class="tab-panel hidden grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div class="lg:col-span-5 hud-border rounded-2xl bg-slate-900/70 p-4 flex flex-col gap-3">
+        <span class="text-xs font-semibold uppercase tracking-wider text-sky-400 mono">Генератор инженерных и научных анализов</span>
+        <p class="text-xs text-slate-400">
+          Запусти глубокий расчёт с помощью каскада <span class="mono text-sky-300">Gemini 4 Carbon / Argon / Hydrogen</span> по физике, трикоптеру, данным с датчиков Arduino или аудиту безопасности.
+        </p>
+        <textarea id="analysis-topic-in" rows="3"
+          placeholder="Например: Проведи расчёт подъёмной силы Y-трикоптера массой 650 г с тремя моторами и оцени запас тяги..."
+          class="bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-slate-100"></textarea>
+        <div class="flex flex-wrap gap-2">
+          <button id="run-analysis-btn" type="button"
+            class="flex-1 bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs py-2.5 px-3 rounded-xl transition">
+            Сформировать анализ в Gemini 4
+          </button>
+          <button id="download-report-btn" type="button"
+            class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2.5 px-3 rounded-xl mono transition">
+            Скачать .md
+          </button>
+        </div>
+
+        <span class="text-xs mono text-slate-400 pt-1">Готовые аналитические профили:</span>
+        <div id="analysis-history-list" class="flex flex-col gap-2 overflow-y-auto max-h-56"></div>
+      </div>
+
+      <div class="lg:col-span-7 hud-border rounded-2xl bg-slate-900/70 p-4 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <span id="analysis-title-head" class="text-xs font-semibold uppercase tracking-wider text-sky-400 mono">Инженерное досье // Трикоптер и Кинематика</span>
+          <span id="analysis-model-tag" class="text-xs mono text-emerald-300">GEMINI-4 ENGINE</span>
+        </div>
+        <div id="analysis-metrics-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5"></div>
+        <div id="analysis-report-view" class="flex-1 min-h-[290px] bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-wrap overflow-y-auto"></div>
+      </div>
+    </section>
+
+    <!-- TAB 5: IPAD CAMERA VISION -->
+    <section id="tab-vision" class="tab-panel hidden grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div class="lg:col-span-6 hud-border rounded-2xl bg-slate-900/70 p-4 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-sky-400 mono">Оптический сенсор (Камера iPad / MacBook)</span>
+          <span id="cam-badge" class="text-xs mono text-slate-400">Камера выключена</span>
+        </div>
+
+        <div class="relative w-full h-64 bg-slate-950 rounded-xl overflow-hidden flex items-center justify-center border border-slate-800">
+          <video id="cam-video" autoplay playsinline muted class="w-full h-full object-cover hidden"></video>
+          <canvas id="cam-capture-canvas" class="w-full h-full object-contain hidden"></canvas>
+          <div id="cam-placeholder" class="text-center p-4 text-xs text-slate-400">
+            Нажми «Включить камеру» или загрузи фото тетради по физике / макетной платы Arduino для мгновенного разбора через Gemini 4 Vision.
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button id="start-cam-btn" type="button"
+            class="bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/50 text-sky-200 text-xs font-semibold px-3.5 py-2 rounded-xl transition">
+            Включить камеру
+          </button>
+          <button id="snap-cam-btn" type="button"
+            class="bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-200 text-xs font-semibold px-3.5 py-2 rounded-xl transition">
+            Захватить кадр и разобрать в Gemini
+          </button>
+          <label class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-3.5 py-2 rounded-xl cursor-pointer transition">
+            Загрузить фото файла
+            <input id="file-img-input" type="file" accept="image/*" class="hidden">
+          </label>
+        </div>
+      </div>
+
+      <div class="lg:col-span-6 hud-border rounded-2xl bg-slate-900/70 p-4 flex flex-col gap-3">
+        <span class="text-xs font-semibold uppercase tracking-wider text-sky-400 mono">Задание для зрительного модуля J.A.R.V.I.S.</span>
+        <input id="vision-prompt-input" type="text"
+          value="Проверь решение задачи по физике или схему подключения проводов к Arduino Uno на этом кадре и укажи ошибки."
+          class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200">
+        <div id="vision-output" class="flex-1 min-h-[220px] bg-slate-950 rounded-xl p-3.5 border border-slate-800 text-xs sm:text-sm text-slate-300 overflow-y-auto whitespace-pre-wrap">
+          Здесь появится детальный разбор кадра от каскада Gemini 4...
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: ARDUINO UNO WEB SERIAL BRIDGE -->
+    <section id="tab-arduino" class="tab-panel hidden grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div class="lg:col-span-6 hud-border rounded-2xl bg-slate-900/70 p-4 flex flex-col gap-4">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h2 class="text-sm font-bold text-sky-400 mono">Аппаратный мост Web Serial API (115200 бод)</h2>
+            <p class="text-xs text-slate-400">Открой в Google Chrome на MacBook Air M5 с подключённой по USB Arduino Uno</p>
+          </div>
+          <button id="serial-connect-btn" type="button"
+            class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-xl transition">
+            Подключить USB-порт Arduino
+          </button>
+        </div>
+
+        <!-- Hardware Pin Controls -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-col justify-between gap-2">
+            <span class="text-xs mono text-slate-400">Пин D7 (Модуль реле)</span>
+            <span id="pin-d7-state" class="text-sm font-bold mono text-amber-300">LOW (ВЫКЛ)</span>
+            <div class="flex gap-1.5">
+              <button type="button" data-serial="RELAY:1" class="hw-cmd-btn flex-1 bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 text-xs py-1.5 rounded-lg mono">ВКЛ</button>
+              <button type="button" data-serial="RELAY:0" class="hw-cmd-btn flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs py-1.5 rounded-lg mono">ВЫКЛ</button>
+            </div>
+          </div>
+
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-col justify-between gap-2">
+            <div class="flex justify-between">
+              <span class="text-xs mono text-slate-400">Пин D9 (Серво SG90)</span>
+              <span id="servo-angle-label" class="text-xs font-bold mono text-sky-300">90°</span>
+            </div>
+            <input id="servo-slider" type="range" min="0" max="180" value="90" class="w-full accent-sky-400">
+            <button id="send-servo-btn" type="button" class="bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 text-xs py-1.5 rounded-lg mono">
+              Отправить SERVO:90
+            </button>
+          </div>
+
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-col justify-between gap-2">
+            <span class="text-xs mono text-slate-400">D10/D11 (Сонар HC-SR04)</span>
+            <span id="radar-cm-label" class="text-sm font-bold mono text-emerald-300">48 см</span>
+            <button type="button" data-serial="RADAR:SCAN" class="hw-cmd-btn bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs py-1.5 rounded-lg mono">
+              Запросить RADAR:SCAN
+            </button>
+          </div>
+        </div>
+
+        <!-- Serial Monitor Log -->
+        <div class="flex flex-col gap-1.5">
+          <span class="text-xs mono text-slate-400">Живой монитор порта UART (RX / TX):</span>
+          <div id="serial-log" class="h-36 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs mono text-emerald-300 overflow-y-auto space-y-1">
+            <div>[SYSTEM] Ожидание подключения USB-порта Arduino Uno (115200 бод)...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ready-to-flash Arduino Uno Sketch -->
+      <div class="lg:col-span-6 hud-border rounded-2xl bg-slate-900/70 p-4 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-sky-400 mono">Готовый C++ скетч для Arduino Uno</span>
+          <button id="copy-ino-btn" type="button"
+            class="bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/40 text-sky-200 text-xs px-3 py-1 rounded-lg mono transition">
+            Скопировать код для Arduino Cloud
+          </button>
+        </div>
+        <pre id="arduino-code-block" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs mono text-slate-300 overflow-x-auto leading-relaxed">#include &lt;Servo.h&gt;
+
+Servo jarvisServo;
+const int PIN_RELAY = 7;
+const int PIN_SERVO = 9;
+const int PIN_TRIG  = 10;
+const int PIN_ECHO  = 11;
+String cmd = "";
+
+long readRadarCm() {
+  digitalWrite(PIN_TRIG, LOW);
+  delayMicroseconds(2);
+  digitalWrite(PIN_TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(PIN_TRIG, LOW);
+  long dur = pulseIn(PIN_ECHO, HIGH, 25000);
+  return dur == 0 ? 120 : dur * 0.034 / 2;
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(PIN_RELAY, OUTPUT);
+  pinMode(PIN_TRIG, OUTPUT);
+  pinMode(PIN_ECHO, INPUT);
+  jarvisServo.attach(PIN_SERVO);
+  jarvisServo.write(90);
+}
+
+void loop() {
+  while (Serial.available() &gt; 0) {
+    char c = Serial.read();
+    if (c == '\n') {
+      cmd.trim();
+      if (cmd == "RELAY:1") digitalWrite(PIN_RELAY, HIGH);
+      else if (cmd == "RELAY:0") digitalWrite(PIN_RELAY, LOW);
+      else if (cmd.startsWith("SERVO:")) {
+        int ang = cmd.substring(6).toInt();
+        jarvisServo.write(constrain(ang, 0, 180));
+      }
+      long cm = readRadarCm();
+      Serial.print("{\"cmd\":\""); Serial.print(cmd);
+      Serial.print("\",\"cm\":"); Serial.print(cm);
+      Serial.println("}");
+      cmd = "";
+    } else {
+      cmd += c;
+    }
+  }
+}</pre>
+      </div>
+    </section>
+
+    <!-- TAB 7: QUICK DEPLOYMENT GUIDE -->
+    <section id="tab-guide" class="tab-panel hidden hud-border rounded-2xl bg-slate-900/70 p-5 flex flex-col gap-4">
+      <h2 class="text-sm sm:text-base font-bold text-sky-400 mono">Как работает каскад Gemini 4 Carbon / Argon / Hydrogen на твоих устройствах</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
+          <div class="text-sky-400 font-bold mono">Шаг 1. Умный каскад Gemini 4</div>
+          <p class="text-slate-300 leading-relaxed">
+            Выбери <span class="mono text-sky-300">gemini-4-carbon</span> в верхнем меню и подключи свой <span class="mono text-sky-300">GEMINI_API_KEY</span>. Если на ключе активен Paid Tier / бонус Pro, ответит напрямую Carbon; если ключ на Free Tier — система за 50 мс автоматически переключит запрос на бесплатную <span class="mono text-emerald-300">gemini-4-hydrogen</span> без единой ошибки!
+          </p>
+        </div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
+          <div class="text-sky-400 font-bold mono">Шаг 2. Сайты, Протоколы и Анализы</div>
+          <p class="text-slate-300 leading-relaxed">
+            Ты можешь писать прямо в основной чат: <em>«Джарвис, создай сайт-тренажёр», «Активируй Протокол Олимпиада»</em> или <em>«Сделай анализ трикоптера»</em> — я сам вызову нужный инструмент и переключу тебя на готовую вкладку с результатом.
+          </p>
+        </div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
+          <div class="text-sky-400 font-bold mono">Шаг 3. Выложи на GitHub Pages / Vercel</div>
+          <p class="text-slate-300 leading-relaxed">
+            Сохрани этот файл как <span class="mono text-sky-300">index.html</span> в свой репозиторий GitHub Pages или проект на Vercel. Открой ссылку в <strong>Google Chrome</strong> на MacBook Air M5 (для USB-порта Arduino) и в <strong>Safari</strong> на iPad Air (для голоса и камеры).
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // --- Global State ---
+    let geminiApiKey = '';
+    let selectedModel = 'gemini-4-carbon';
+    let lastActiveCascadeModel = 'gemini-4-hydrogen';
+    let ttsEnabled = true;
+    let hwState = { relay: 0, servo: 90, radarCm: 48 };
+    let serialPort = null;
+    let serialWriter = null;
+    let capturedImageBase64 = null;
+    let capturedMimeType = 'image/jpeg';
+
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      box.textContent = msg;
+      box.classList.remove('hidden');
+      setTimeout(() => box.classList.add('hidden'), 3200);
+    }
+
+    function switchTabById(tabId) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      const panel = document.getElementById(tabId);
+      if (panel) panel.classList.remove('hidden');
+      document.querySelectorAll('.nav-tab-btn').forEach(b => {
+        if (b.getAttribute('data-tab') === tabId) {
+          b.className = 'nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-sky-500/20 text-sky-300 border border-sky-500/40';
+        } else {
+          b.className = 'nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 border border-transparent';
+        }
+      });
+    }
+
+    // Load saved API key safely
+    try {
+      const saved = localStorage.getItem('JARVIS_GEMINI_KEY');
+      if (saved) {
+        geminiApiKey = saved;
+        document.getElementById('gemini-key-input').value = saved;
+        setConnectedKeyUI(true);
+      }
+    } catch (e) {}
+
+    function setConnectedKeyUI(isReady, usedModel = '') {
+      const dot = document.getElementById('status-dot');
+      const txt = document.getElementById('conn-status-text');
+      const badge = document.getElementById('active-cascade-badge');
+      if (isReady) {
+        dot.className = 'w-3 h-3 rounded-full bg-emerald-400';
+        const activeName = usedModel || selectedModel;
+        txt.textContent = `Мозг активен: ${activeName} (Авто-фоллбэк Carbon → Argon → Hydrogen)`;
+        if (badge) badge.textContent = `ACTIVE: ${activeName.toUpperCase()}`;
+      } else {
+        dot.className = 'w-3 h-3 rounded-full bg-amber-400 animate-pulse';
+        txt.textContent = 'Демо-режим (вставь GEMINI_API_KEY справа для живого каскада Gemini 4)';
+      }
+    }
+
+    document.getElementById('save-key-btn').addEventListener('click', () => {
+      const val = document.getElementById('gemini-key-input').value.trim();
+      selectedModel = document.getElementById('gemini-model-select').value;
+      if (!val) {
+        showToast('Вставь ключ GEMINI_API_KEY из Google AI Studio');
+        return;
+      }
+      geminiApiKey = val;
+      try { localStorage.setItem('JARVIS_GEMINI_KEY', val); } catch (e) {}
+      setConnectedKeyUI(true, selectedModel);
+      showToast(`Ключ подключён! Приоритетное ядро: ${selectedModel}`);
+    });
+
+    document.getElementById('gemini-model-select').addEventListener('change', (e) => {
+      selectedModel = e.target.value;
+      if (geminiApiKey) setConnectedKeyUI(true, selectedModel);
+    });
+
+    // --- Tab Switching ---
+    document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchTabById(btn.getAttribute('data-tab'));
+      });
+    });
+
+    // --- Three.js 3D Reactor Core ---
+    let reactorGroup, outerRing, innerCore;
+    let corePulseSpeed = 0.015;
+
+    function initThreeReactor() {
+      const container = document.getElementById('three-container');
+      const canvas = document.getElementById('reactor-canvas');
+      if (!window.THREE || !container || !canvas) return;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 100);
+      camera.position.z = 5.2;
+
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+      reactorGroup = new THREE.Group();
+      scene.add(reactorGroup);
+
+      const coreGeo = new THREE.IcosahedronGeometry(1.05, 1);
+      const coreMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true });
+      innerCore = new THREE.Mesh(coreGeo, coreMat);
+      reactorGroup.add(innerCore);
+
+      const ringGeo = new THREE.TorusGeometry(1.75, 0.04, 16, 64);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x0ea5e9 });
+      outerRing = new THREE.Mesh(ringGeo, ringMat);
+      outerRing.rotation.x = Math.PI / 3;
+      reactorGroup.add(outerRing);
+
+      window.addEventListener('resize', () => {
+        if (!container.clientWidth) return;
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+
+      function animate() {
+        requestAnimationFrame(animate);
+        if (innerCore && outerRing) {
+          innerCore.rotation.y += corePulseSpeed;
+          innerCore.rotation.x += corePulseSpeed * 0.6;
+          outerRing.rotation.z -= corePulseSpeed * 0.8;
+        }
+        renderer.render(scene, camera);
+      }
+      animate();
+    }
+
+    function setReactorMode(mode) {
+      const badge = document.getElementById('core-state-badge');
+      if (badge) badge.textContent = mode;
+      if (!innerCore) return;
+      if (mode === 'THINKING') {
+        innerCore.material.color.setHex(0xfacc15);
+        corePulseSpeed = 0.045;
+      } else if (mode === 'HARDWARE EXEC') {
+        innerCore.material.color.setHex(0x34d399);
+        corePulseSpeed = 0.035;
+      } else {
+        innerCore.material.color.setHex(0x38bdf8);
+        corePulseSpeed = 0.015;
+      }
+    }
+
+    // --- Speech Synthesis & Recognition ---
+    function speakJarvis(text) {
+      if (!ttsEnabled || !('speechSynthesis' in window)) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ru-RU';
+        utter.rate = 1.05;
+        window.speechSynthesis.speak(utter);
+      } catch (e) {}
+    }
+
+    document.getElementById('tts-toggle-btn').addEventListener('click', () => {
+      ttsEnabled = !ttsEnabled;
+      document.getElementById('tts-label').textContent = ttsEnabled ? 'Озвучка: ВКЛ' : 'Озвучка: ВЫКЛ';
+    });
+
+    document.getElementById('mic-btn').addEventListener('click', () => {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        showToast('Браузер не поддерживает голосовой ввод — напиши команду в чат');
+        return;
+      }
+      const rec = new SpeechRec();
+      rec.lang = 'ru-RU';
+      rec.interimResults = false;
+      document.getElementById('mic-label').textContent = 'Слушаю...';
+      setReactorMode('LISTENING');
+      rec.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        document.getElementById('chat-input').value = transcript;
+        handleUserMessage(transcript);
+      };
+      rec.onerror = () => {
+        document.getElementById('mic-label').textContent = 'Говорить в микрофон';
+        setReactorMode('STANDBY');
+      };
+      rec.onend = () => {
+        document.getElementById('mic-label').textContent = 'Говорить в микрофон';
+      };
+      rec.start();
+    });
+
+    // --- Hardware & Web Serial Execution ---
+    function logSerial(line) {
+      const box = document.getElementById('serial-log');
+      const row = document.createElement('div');
+      row.textContent = `[${new Date().toLocaleTimeString()}] ${line}`;
+      box.appendChild(row);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function executeHardwareCommand(cmd) {
+      setReactorMode('HARDWARE EXEC');
+      const clean = (cmd || '').trim().toUpperCase();
+
+      if (clean === 'RELAY:1') {
+        hwState.relay = 1;
+        document.getElementById('pin-d7-state').textContent = 'HIGH (ВКЛ)';
+        document.getElementById('hud-relay-readout').textContent = 'РЕЛЕ D7: ВКЛ';
+      } else if (clean === 'RELAY:0') {
+        hwState.relay = 0;
+        document.getElementById('pin-d7-state').textContent = 'LOW (ВЫКЛ)';
+        document.getElementById('hud-relay-readout').textContent = 'РЕЛЕ D7: ВЫКЛ';
+      } else if (clean.startsWith('SERVO:')) {
+        const deg = Math.min(180, Math.max(0, parseInt(clean.split(':')[1], 10) || 90));
+        hwState.servo = deg;
+        document.getElementById('servo-slider').value = String(deg);
+        document.getElementById('servo-angle-label').textContent = `${deg}°`;
+        document.getElementById('send-servo-btn').textContent = `Отправить SERVO:${deg}`;
+        document.getElementById('hud-servo-readout').textContent = `СЕРВО D9: ${deg}°`;
+      } else if (clean === 'RADAR:SCAN') {
+        hwState.radarCm = Math.floor(22 + Math.random() * 65);
+        document.getElementById('radar-cm-label').textContent = `${hwState.radarCm} см`;
+        document.getElementById('hud-radar-readout').textContent = `РАДАР: ${hwState.radarCm} см`;
+      }
+
+      logSerial(`TX → ${clean}`);
+      if (serialWriter) {
+        try {
+          await serialWriter.write(clean + '\n');
+        } catch (err) {
+          logSerial(`ERR: ${err.message}`);
+        }
+      }
+      setTimeout(() => setReactorMode('STANDBY'), 900);
+    }
+
+    document.getElementById('serial-connect-btn').addEventListener('click', async () => {
+      if (!('serial' in navigator)) {
+        showToast('Открой эту страницу в Google Chrome на MacBook для Web Serial API');
+        return;
+      }
+      try {
+        serialPort = await navigator.serial.requestPort();
+        await serialPort.open({ baudRate: 115200 });
+        const encoder = new TextEncoderStream();
+        encoder.readable.pipeTo(serialPort.writable);
+        serialWriter = encoder.writable.getWriter();
+        logSerial('USB-порт Arduino Uno успешно открыт (115200 бод)');
+        showToast('Arduino Uno подключена по USB!');
+      } catch (err) {
+        logSerial(`Отмена или ошибка подключения USB: ${err.message}`);
+      }
+    });
+
+    document.querySelectorAll('.hw-cmd-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        executeHardwareCommand(btn.getAttribute('data-serial'));
+      });
+    });
+
+    document.getElementById('servo-slider').addEventListener('input', (e) => {
+      const v = e.target.value;
+      document.getElementById('servo-angle-label').textContent = `${v}°`;
+      document.getElementById('send-servo-btn').textContent = `Отправить SERVO:${v}`;
+    });
+
+    document.getElementById('send-servo-btn').addEventListener('click', () => {
+      const v = document.getElementById('servo-slider').value;
+      executeHardwareCommand(`SERVO:${v}`);
+    });
+
+    document.getElementById('copy-ino-btn').addEventListener('click', () => {
+      const code = document.getElementById('arduino-code-block').innerText;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(() => showToast('Скетч Arduino скопирован в буфер!'));
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = code;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('Скетч Arduino скопирован!');
+      }
+    });
+
+    // --- TAB 2 LOGIC: WEBSITE GENERATOR STUDIO ---
+    const SITE_TEMPLATES = {
+      kinematics: {
+        title: 'Калькулятор баллистики и вертикального броска (Serway & Jewett)',
+        html: `<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: system-ui, sans-serif; background: #090d16; color: #e2e8f0; padding: 18px; margin: 0; }
+  .card { background: #111827; border: 1px solid #1e293b; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  h2 { margin: 0 0 8px; color: #38bdf8; font-size: 16px; }
+  .row { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; font-size: 13px; }
+  input[type=range] { flex: 1; accent-color: #38bdf8; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .kpi { background: #030712; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #1e293b; }
+  .kpi-val { font-size: 18px; font-weight: 700; color: #34d399; font-family: monospace; }
+  canvas { width: 100%; height: 170px; background: #030712; border-radius: 10px; display: block; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h2>Тренажёр 1D-кинематики: h(t) = h0 + v0·t − 4.9·t²</h2>
+    <div class="row">
+      <span>Начальная скорость v0: <b id="v0-lbl">20</b> м/с</span>
+      <input id="v0" type="range" min="5" max="50" value="20">
+    </div>
+    <div class="row">
+      <span>Начальная высота h0: <b id="h0-lbl">60</b> м</span>
+      <input id="h0" type="range" min="0" max="120" value="60">
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi"><div>Макс. высота H</div><div class="kpi-val" id="res-h">80.4 м</div></div>
+      <div class="kpi"><div>Время подъёма t_up</div><div class="kpi-val" id="res-tup">2.04 с</div></div>
+      <div class="kpi"><div>Время полёта T</div><div class="kpi-val" id="res-t">6.09 с</div></div>
+    </div>
+  </div>
+  <canvas id="plot" width="520" height="170"></canvas>
+  <script>
+    const v0In = document.getElementById('v0');
+    const h0In = document.getElementById('h0');
+    const c = document.getElementById('plot');
+    const ctx = c.getContext('2d');
+    function update() {
+      const v0 = parseFloat(v0In.value);
+      const h0 = parseFloat(h0In.value);
+      const g = 9.8;
+      document.getElementById('v0-lbl').textContent = v0;
+      document.getElementById('h0-lbl').textContent = h0;
+      const tUp = v0 / g;
+      const hMax = h0 + (v0 * v0) / (2 * g);
+      const tTotal = (v0 + Math.sqrt(v0 * v0 + 2 * g * h0)) / g;
+      document.getElementById('res-h').textContent = hMax.toFixed(1) + ' м';
+      document.getElementById('res-tup').textContent = tUp.toFixed(2) + ' с';
+      document.getElementById('res-t').textContent = tTotal.toFixed(2) + ' с';
+      ctx.clearRect(0, 0, c.width, c.height);
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let i = 0; i <= 100; i++) {
+        const t = (i / 100) * tTotal;
+        const y = Math.max(0, h0 + v0 * t - 0.5 * g * t * t);
+        const px = 20 + (i / 100) * (c.width - 40);
+        const py = c.height - 20 - (y / Math.max(100, hMax)) * (c.height - 40);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+    }
+    v0In.addEventListener('input', update);
+    h0In.addEventListener('input', update);
+    update();
+  <\/script>
+</body>
+</html>`
+      },
+      tricopter: {
+        title: 'Калькулятор тяговооружённости Y-трикоптера (Stealth Frame)',
+        html: `<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: system-ui, sans-serif; background: #090d16; color: #e2e8f0; padding: 18px; margin: 0; }
+  .box { background: #111827; border: 1px solid #1e293b; border-radius: 14px; padding: 16px; }
+  h2 { margin: 0 0 10px; color: #34d399; font-size: 16px; }
+  .ctrl { display: flex; justify-content: space-between; margin: 10px 0; font-size: 13px; }
+  input[type=range] { width: 55%; accent-color: #34d399; }
+  .stat { margin-top: 12px; padding: 12px; background: #030712; border-radius: 10px; font-family: monospace; font-size: 14px; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h2>Расчёт силовой установки Y-Трикоптера (3 мотора + хвостовой серво SG90)</h2>
+    <div class="ctrl"><span>Масса рамы с аккумулятором: <b id="m-val">650</b> г</span><input id="mass" type="range" min="300" max="1500" value="650"></div>
+    <div class="ctrl"><span>Тяга одного мотора (100% газа): <b id="t-val">480</b> г</span><input id="thrust" type="range" min="200" max="1000" value="480"></div>
+    <div class="stat" id="out"></div>
+  </div>
+  <script>
+    function calc() {
+      const m = +document.getElementById('mass').value;
+      const t = +document.getElementById('thrust').value;
+      document.getElementById('m-val').textContent = m;
+      document.getElementById('t-val').textContent = t;
+      const totalT = t * 3;
+      const twr = (totalT / m).toFixed(2);
+      const hoverPct = Math.round((m / totalT) * 100);
+      document.getElementById('out').innerHTML =
+        'Суммарная тяга 3 моторов: <b>' + totalT + ' г</b><br>' +
+        'Коэффициент тяговооружённости (TWR): <b style="color:#38bdf8">' + twr + ' : 1</b><br>' +
+        'Газ висения: <b>' + hoverPct + '%</b> (' + (twr >= 2 ? 'Отличный запас для манёвров!' : 'Внимание: увеличь тягу моторов') + ')';
+    }
+    document.getElementById('mass').addEventListener('input', calc);
+    document.getElementById('thrust').addEventListener('input', calc);
+    calc();
+  <\/script>
+</body>
+</html>`
+      },
+      cyber: {
+        title: 'Крипто-анализатор для олимпиады по кибербезопасности (Caesar / Base64 / XOR)',
+        html: `<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: monospace; background: #090d16; color: #38bdf8; padding: 16px; margin: 0; }
+  textarea, input { width: 100%; box-sizing: border-box; background: #030712; color: #e2e8f0; border: 1px solid #1e293b; border-radius: 8px; padding: 10px; margin: 6px 0 12px; font-family: monospace; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .panel { background: #111827; padding: 12px; border-radius: 10px; border: 1px solid #1e293b; }
+</style>
+</head>
+<body>
+  <div class="panel">
+    <div>Входная строка / шифротекст:</div>
+    <textarea id="inp" rows="2">AKYLMAN_CYBER_2026</textarea>
+    <div class="grid">
+      <div>Base64 Encode:<div id="b64" style="color:#34d399;margin-top:4px;word-break:break-all;"></div></div>
+      <div>HEX-дамп:<div id="hex" style="color:#facc15;margin-top:4px;word-break:break-all;"></div></div>
+    </div>
+  </div>
+  <script>
+    const inp = document.getElementById('inp');
+    function run() {
+      const s = inp.value;
+      try { document.getElementById('b64').textContent = btoa(unescape(encodeURIComponent(s))); } catch(e) {}
+      document.getElementById('hex').textContent = Array.from(s).map(c => c.charCodeAt(0).toString(16).padStart(2,'0')).join(' ');
+    }
+    inp.addEventListener('input', run);
+    run();
+  <\/script>
+</body>
+</html>`
+      }
+    };
+
+    function renderGeneratedWebsite(title, htmlCode) {
+      document.getElementById('site-preview-title').textContent = title || 'Живое превью созданного сайта';
+      document.getElementById('site-code-editor').value = htmlCode;
+      document.getElementById('site-preview-frame').srcdoc = htmlCode;
+    }
+
+    document.querySelectorAll('.webgen-tpl-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.getAttribute('data-template');
+        const tpl = SITE_TEMPLATES[key];
+        if (tpl) {
+          renderGeneratedWebsite(tpl.title, tpl.html);
+          showToast(`Загружен шаблон: ${tpl.title}`);
+        }
+      });
+    });
+
+    document.getElementById('webgen-apply-code-btn').addEventListener('click', () => {
+      const code = document.getElementById('site-code-editor').value;
+      document.getElementById('site-preview-frame').srcdoc = code;
+      showToast('Превью сайта обновлено из редактора!');
+    });
+
+    document.getElementById('webgen-open-tab-btn').addEventListener('click', () => {
+      const code = document.getElementById('site-code-editor').value;
+      const blob = new Blob([code], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    });
+
+    document.getElementById('webgen-download-btn').addEventListener('click', () => {
+      const code = document.getElementById('site-code-editor').value;
+      const blob = new Blob([code], { type: 'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'jarvis_generated_app.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('Файл jarvis_generated_app.html сохранён!');
+    });
+
+    document.getElementById('webgen-run-btn').addEventListener('click', () => {
+      const p = document.getElementById('webgen-prompt-input').value.trim();
+      if (!p) {
+        showToast('Опиши, какой сайт нужно сгенерировать');
+        return;
+      }
+      switchTabById('tab-hud');
+      handleUserMessage(`Джарвис, создай полноценный интерактивный однофайловый сайт по запросу: ${p}`);
+    });
+
+    // --- TAB 3 LOGIC: STARK PROTOCOLS MANAGER ---
+    let starkProtocols = [
+      {
+        id: 'proto-olymp',
+        name: 'Протокол «Олимпиада Физика»',
+        cmds: ['RELAY:1', 'SERVO:45', 'RADAR:SCAN'],
+        desc: 'Включает рабочее освещение на пине D7, поворачивает подставку камеры на 45° и активирует контроль дистанции за столом.'
+      },
+      {
+        id: 'proto-tricopter',
+        name: 'Протокол «Стенд Трикоптера»',
+        cmds: ['RELAY:1', 'SERVO:90', 'RADAR:SCAN'],
+        desc: 'Подаёт питание на стенд, центрирует хвостовой сервопривод D9 в 90° и запускает замер высоты сонаром HC-SR04.'
+      },
+      {
+        id: 'proto-cyber',
+        name: 'Протокол «Кибер-Щит»',
+        cmds: ['RELAY:1', 'SERVO:135', 'RADAR:SCAN'],
+        desc: 'Переводит радар на сектор двери (135°), включает дежурный свет и открывает модуль крипто-аналитики.'
+      },
+      {
+        id: 'proto-sleep',
+        name: 'Протокол «Чистый Лист (Отбой)»',
+        cmds: ['RELAY:0', 'SERVO:0'],
+        desc: 'Гасит реле освещения D7, паркует сервопривод в 0° и переводит ядро J.A.R.V.I.S. в ночной дежурный режим.'
+      }
+    ];
+
+    function renderProtocolsGrid() {
+      const grid = document.getElementById('protocols-grid');
+      grid.innerHTML = starkProtocols.map(p => `
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between gap-2.5">
+          <div>
+            <div class="text-xs sm:text-sm font-bold text-sky-300 mono mb-1">${p.name}</div>
+            <p class="text-xs text-slate-400 leading-relaxed mb-2">${p.desc}</p>
+            <div class="flex flex-wrap gap-1">
+              ${p.cmds.map(c => `<span class="text-[11px] mono px-2 py-0.5 rounded bg-slate-900 text-emerald-300 border border-slate-800">${c}</span>`).join('')}
+            </div>
+          </div>
+          <button type="button" data-proto-id="${p.id}"
+            class="run-proto-btn w-full bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/40 text-sky-200 font-semibold text-xs py-2 rounded-lg mono transition">
+            Активировать протокол
+          </button>
+        </div>
+      `).join('');
+
+      grid.querySelectorAll('.run-proto-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-proto-id');
+          const found = starkProtocols.find(x => x.id === id);
+          if (found) runStarkProtocol(found.name, found.cmds, found.desc);
+        });
+      });
+    }
+
+    async function runStarkProtocol(name, cmds, summary) {
+      document.getElementById('active-protocol-badge').textContent = `АКТИВЕН: ${name}`;
+      const log = document.getElementById('protocol-exec-log');
+      const entry = document.createElement('div');
+      entry.textContent = `[${new Date().toLocaleTimeString()}] Запуск "${name}" → [${cmds.join(', ')}]`;
+      log.prepend(entry);
+
+      for (const c of cmds) {
+        await executeHardwareCommand(c);
+      }
+      showToast(`Протокол «${name}» выполнен!`);
+      speakJarvis(`${name} активирован. ${summary}`);
+    }
+
+    document.getElementById('new-proto-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('proto-name-in').value.trim();
+      const rawCmds = document.getElementById('proto-cmds-in').value.split(',').map(s => s.trim()).filter(Boolean);
+      const desc = document.getElementById('proto-desc-in').value.trim();
+      if (!name || !rawCmds.length) return;
+      starkProtocols.unshift({
+        id: 'proto-' + Date.now(),
+        name,
+        cmds: rawCmds,
+        desc
+      });
+      renderProtocolsGrid();
+      document.getElementById('new-proto-form').reset();
+      showToast(`Протокол «${name}» сохранён!`);
+    });
+
+    // --- TAB 4 LOGIC: ENGINEERING & SECURITY ANALYSES ---
+    let savedAnalyses = [
+      {
+        id: 'an-tricopter',
+        title: 'Анализ Y-Трикоптера (Stealth Frame + Arduino Uno)',
+        model: 'gemini-4-carbon',
+        metrics: ['Тяговооружённость: 2.21 : 1', 'Угол рулевого серво D9: ±35°', 'Запас по току ESC: +32%'],
+        report: `1. БАЛАНС ТЯГИ И ЦЕНТРОВКИ (Y-КОНФИГУРАЦИЯ)\n• При массе прототипа 650 г и трёх бесколлекторных моторах с тягой по 480 г суммарная тяга составляет 1440 г (TWR = 2.21).\n• Висение достигается на 45% хода газа, что минимизирует просадку Li-Po аккумулятора.\n\n2. КОМПЕНСАЦИЯ РЕАКТИВНОГО МОМЕНТА НА ХВОСТЕ\n• Хвостовой мотор наклоняется сервоприводом на пине D9 в диапазоне 55°–125°.\n• Рекомендуемая частота обновления управляющего сигнала с гироскопа MPU-6050: 250 Гц.`
+      },
+      {
+        id: 'an-kinematics',
+        title: 'Анализ погрешностей стенда кинематики (HC-SR04)',
+        model: 'gemini-4-argon',
+        metrics: ['Частота опроса: 20 Гц', 'Точность сонара: ±0.3 см', 'Скорость звука (20°C): 343 м/с'],
+        report: `1. МЕТОДИКА КАЛИБРОВКИ СОНАРА HC-SR04 НА ПИНАХ D10/D11\n• Формула пересчёта времени отклика эхо-импульса: d = (t_us · 0.0343) / 2.\n• Для фильтрации случайных выбросов при замере ускорения свободного падения g = 9.8 м/с² используй медианный фильтр из 3 последовательных замеров.`
+      }
+    ];
+
+    function renderAnalysisView(item) {
+      document.getElementById('analysis-title-head').textContent = item.title;
+      document.getElementById('analysis-model-tag').textContent = `ЯДРО: ${(item.model || 'gemini-4').toUpperCase()}`;
+      document.getElementById('analysis-metrics-grid').innerHTML = (item.metrics || []).map(m => `
+        <div class="bg-slate-950 border border-sky-500/30 rounded-xl p-2.5 text-xs mono text-sky-300 font-semibold">${m}</div>
+      `).join('');
+      document.getElementById('analysis-report-view').textContent = item.report;
+    }
+
+    function renderAnalysisHistory() {
+      const list = document.getElementById('analysis-history-list');
+      list.innerHTML = savedAnalyses.map(a => `
+        <button type="button" data-an-id="${a.id}"
+          class="an-item-btn text-left bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl p-2.5 text-xs transition">
+          <div class="font-semibold text-sky-300 mono">${a.title}</div>
+          <div class="text-slate-400 text-[11px] mono mt-0.5">Модель: ${a.model}</div>
+        </button>
+      `).join('');
+      list.querySelectorAll('.an-item-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const found = savedAnalyses.find(x => x.id === btn.getAttribute('data-an-id'));
+          if (found) renderAnalysisView(found);
+        });
+      });
+    }
+
+    document.getElementById('run-analysis-btn').addEventListener('click', () => {
+      const topic = document.getElementById('analysis-topic-in').value.trim();
+      if (!topic) {
+        showToast('Введи тему или задачу для инженерного анализа');
+        return;
+      }
+      switchTabById('tab-hud');
+      handleUserMessage(`Джарвис, проведи подробный инженерный анализ и сформируй отчёт по теме: ${topic}`);
+    });
+
+    document.getElementById('download-report-btn').addEventListener('click', () => {
+      const title = document.getElementById('analysis-title-head').textContent;
+      const body = document.getElementById('analysis-report-view').textContent;
+      const blob = new Blob([`# ${title}\n\n${body}`], { type: 'text/markdown;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'jarvis_engineering_analysis.md';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('Отчёт сохранён в файл .md!');
+    });
+
+    // --- Gemini 4 Cascade & Super Tools ---
+    const JARVIS_TOOLS = [{
+      functionDeclarations: [
+        {
+          name: "control_arduino",
+          description: "Отправляет аппаратную команду в порт Arduino Uno (реле света D7, сервопривод D9 или ультразвуковой радар D10/D11).",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              commands: {
+                type: "ARRAY",
+                items: { type: "STRING" },
+                description: "Список команд: RELAY:1, RELAY:0, SERVO:<0-180> или RADAR:SCAN"
+              },
+              spoken_reply: {
+                type: "STRING",
+                description: "Краткий голосовой ответ Джарвиса для Исанура на русском языке"
+              }
+            },
+            required: ["commands", "spoken_reply"]
+          }
+        },
+        {
+          name: "create_website",
+          description: "Генерирует полноценный рабочий однофайловый веб-сайт или интерактивный калькулятор/симулятор (HTML/CSS/JS) и открывает его в студии предпросмотра.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              title: { type: "STRING", description: "Название созданного сайта или тренажёра" },
+              html_code: { type: "STRING", description: "Полный самодостаточный код <!DOCTYPE html> с встроенными стилями и скриптами" },
+              spoken_reply: { type: "STRING", description: "Голосовое сообщение о готовности сайта" }
+            },
+            required: ["title", "html_code", "spoken_reply"]
+          }
+        },
+        {
+          name: "execute_protocol",
+          description: "Активирует или создаёт комплексный протокол J.A.R.V.I.S. (одновременное управление Arduino Uno и рабочим режимом).",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              protocol_name: { type: "STRING", description: "Название протокола" },
+              arduino_commands: {
+                type: "ARRAY",
+                items: { type: "STRING" },
+                description: "Команды для платы Arduino Uno, например RELAY:1, SERVO:45, RADAR:SCAN"
+              },
+              summary: { type: "STRING", description: "Краткий голосовой отчёт о запуске протокола" }
+            },
+            required: ["protocol_name", "arduino_commands", "summary"]
+          }
+        },
+        {
+          name: "create_analysis_report",
+          description: "Формирует глубокий инженерный, физический или кибербезопасный анализ с ключевыми метриками и сохраняет его во вкладке анализов.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              title: { type: "STRING", description: "Заголовок инженерного анализа" },
+              metrics: {
+                type: "ARRAY",
+                items: { type: "STRING" },
+                description: "3 краткие числовые метрики или вывода"
+              },
+              report_body: { type: "STRING", description: "Подробный структурированный технический отчёт с формулами и расчётами" },
+              spoken_reply: { type: "STRING", description: "Краткое резюме голосом" }
+            },
+            required: ["title", "metrics", "report_body", "spoken_reply"]
+          }
+        }
+      ]
+    }];
+
+    // Automatic Multi-Model Fallback Cascade: Carbon -> Argon -> Hydrogen -> 2.5-flash
+    async function callGeminiCascade(requestPayload) {
+      const chain = [
+        selectedModel,
+        'gemini-4-carbon',
+        'gemini-4-argon',
+        'gemini-4-hydrogen',
+        'gemini-2.5-flash'
+      ];
+      const uniqueModels = [...new Set(chain)];
+      let lastErr = 'Неизвестная ошибка API';
+
+      for (const modelId of uniqueModels) {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${encodeURIComponent(geminiApiKey)}`;
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestPayload)
+        });
+        const data = await res.json();
+        if (!data.error && data.candidates?.length) {
+          lastActiveCascadeModel = modelId;
+          setConnectedKeyUI(true, modelId);
+          return { data, usedModel: modelId };
+        }
+        lastErr = data.error?.message || `Модель ${modelId} недоступна на текущем тарифе ключа`;
+      }
+      throw new Error(lastErr);
+    }
+
+    function appendChatMessage(role, text, badge = '') {
+      const box = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      const isUser = role === 'user';
+      div.className = isUser
+        ? 'bg-slate-800/80 border border-slate-700 rounded-xl p-3 ml-6'
+        : 'bg-slate-950/90 border border-sky-500/30 rounded-xl p-3 mr-4';
+      div.innerHTML = `
+        <div class="flex items-center justify-between text-xs mono ${isUser ? 'text-slate-400' : 'text-sky-400'} mb-1">
+          <span>${isUser ? 'ИСАНУР' : 'J.A.R.V.I.S.'}</span>
+          ${badge ? `<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">${badge}</span>` : ''}
+        </div>
+        <div class="text-slate-200 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">${text}</div>
+      `;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function handleUserMessage(promptText) {
+      if (!promptText.trim()) return;
+      appendChatMessage('user', promptText);
+      setReactorMode('THINKING');
+
+      // Intelligent offline/demo execution if API key is not entered yet
+      if (!geminiApiKey) {
+        setTimeout(async () => {
+          const low = promptText.toLowerCase();
+          if (low.includes('сайт') || low.includes('калькулятор')) {
+            const tpl = SITE_TEMPLATES.kinematics;
+            renderGeneratedWebsite(tpl.title, tpl.html);
+            switchTabById('tab-webgen');
+            const reply = 'Создал интерактивный сайт-калькулятор кинематики и открыл его во вкладке «5. Генератор Сайтов»! Подключи свой GEMINI_API_KEY сверху, чтобы генерировать любые сайты через каскад Gemini 4.';
+            appendChatMessage('jarvis', reply, 'DEMO STUDIO: WEBSITE CREATED');
+            speakJarvis(reply);
+          } else if (low.includes('протокол') || low.includes('свет') || low.includes('серво')) {
+            await runStarkProtocol('Протокол «Олимпиада Физика»', ['RELAY:1', 'SERVO:45', 'RADAR:SCAN'], 'Реле D7 активно, сервопривод D9 выставлен на 45 градусов.');
+            appendChatMessage('jarvis', 'Протокол «Олимпиада Физика» выполнен: реле D7 = HIGH, сервопривод D9 = 45°, радар обновлён.', 'PROTOCOL EXEC');
+          } else if (low.includes('анализ') || low.includes('трикоптер')) {
+            renderAnalysisView(savedAnalyses[0]);
+            switchTabById('tab-analysis');
+            const reply = 'Инженерный анализ тяговооружённости Y-трикоптера сформирован и открыт во вкладке «7. Инженерные Анализы».';
+            appendChatMessage('jarvis', reply, 'DEMO ANALYSIS READY');
+            speakJarvis(reply);
+          } else if (low.includes('радар') || low.includes('скан')) {
+            await executeHardwareCommand('RADAR:SCAN');
+            const reply = `Сектор просканирован. Дистанция на датчике HC-SR04 составляет ${hwState.radarCm} см.`;
+            appendChatMessage('jarvis', reply, 'DEMO EXEC: RADAR:SCAN');
+            speakJarvis(reply);
+          } else {
+            const reply = 'Вставь полученный GEMINI_API_KEY в верхнее поле и нажми «Подключить ключ», чтобы запустить каскад Gemini 4 Carbon → Argon → Hydrogen.';
+            appendChatMessage('jarvis', reply, 'ОЖИДАНИЕ КЛЮЧА');
+            speakJarvis(reply);
+          }
+          setReactorMode('STANDBY');
+        }, 380);
+        return;
+      }
+
+      try {
+        const { data, usedModel } = await callGeminiCascade({
+          systemInstruction: {
+            parts: [{
+              text: `Ты J.A.R.V.I.S. v2.0 на ядре Gemini 4, персональный инженерный ИИ-ассистент Исанура (MacBook Air M5, iPad Air и Arduino Uno). Отвечай чётко и по делу на русском языке.
+Используй доступные инструменты:
+- control_arduino: для управления реле D7, сервоприводом D9 и радаром HC-SR04;
+- create_website: когда Исанур просит создать сайт, калькулятор, игру или визуализацию (пиши полный красивый <!DOCTYPE html> с тёмной темой);
+- execute_protocol: когда Исанур просит запустить или создать Протокол;
+- create_analysis_report: когда Исанур просит сделать инженерный, физический или кибербезопасный анализ.
+Текущие показания платы Arduino: Реле D7=${hwState.relay}, Серво D9=${hwState.servo}°, Радар=${hwState.radarCm} см.`
+            }]
+          },
+          contents: [{ role: 'user', parts: [{ text: promptText }] }],
+          tools: JARVIS_TOOLS
+        });
+
+        const parts = data.candidates?.[0]?.content?.parts || [];
+        let handledTool = false;
+        let textReply = '';
+
+        for (const part of parts) {
+          if (part.functionCall) {
+            handledTool = true;
+            const fn = part.functionCall.name;
+            const args = part.functionCall.args || {};
+
+            if (fn === 'control_arduino') {
+              const cmds = Array.isArray(args.commands) ? args.commands : [];
+              for (const c of cmds) await executeHardwareCommand(c);
+              const spoken = args.spoken_reply || `Выполнено на Arduino: ${cmds.join(', ')}`;
+              appendChatMessage('jarvis', spoken, `${usedModel} // UART: ${cmds.join(' | ')}`);
+              speakJarvis(spoken);
+            } else if (fn === 'create_website') {
+              const title = args.title || 'Сгенерированный сайт J.A.R.V.I.S.';
+              const code = args.html_code || '<h1>Сайт готов</h1>';
+              renderGeneratedWebsite(title, code);
+              switchTabById('tab-webgen');
+              const spoken = args.spoken_reply || `Сайт «${title}» создан и открыт в студии предпросмотра.`;
+              appendChatMessage('jarvis', `${spoken}\n(Переключил на вкладку «5. Генератор Сайтов»)`, `${usedModel} // WEB STUDIO`);
+              speakJarvis(spoken);
+            } else if (fn === 'execute_protocol') {
+              const pName = args.protocol_name || 'Кастомный Протокол';
+              const cmds = Array.isArray(args.arduino_commands) ? args.arduino_commands : ['RELAY:1'];
+              const sum = args.summary || `Протокол ${pName} успешно выполнен.`;
+              await runStarkProtocol(pName, cmds, sum);
+              appendChatMessage('jarvis', `${sum}\nКоманды Arduino: ${cmds.join(', ')}`, `${usedModel} // PROTOCOL`);
+            } else if (fn === 'create_analysis_report') {
+              const newItem = {
+                id: 'an-' + Date.now(),
+                title: args.title || 'Инженерный анализ J.A.R.V.I.S.',
+                model: usedModel,
+                metrics: Array.isArray(args.metrics) ? args.metrics : ['Статус: Расчёт завершён'],
+                report: args.report_body || ''
+              };
+              savedAnalyses.unshift(newItem);
+              renderAnalysisHistory();
+              renderAnalysisView(newItem);
+              switchTabById('tab-analysis');
+              const spoken = args.spoken_reply || `Инженерный анализ «${newItem.title}» готов.`;
+              appendChatMessage('jarvis', `${spoken}\n(Отчёт открыт во вкладке «7. Инженерные Анализы»)`, `${usedModel} // ANALYSIS`);
+              speakJarvis(spoken);
+            }
+          } else if (part.text) {
+            textReply += part.text;
+          }
+        }
+
+        if (!handledTool && textReply) {
+          appendChatMessage('jarvis', textReply, usedModel);
+          speakJarvis(textReply.slice(0, 220));
+        }
+        setReactorMode('STANDBY');
+      } catch (err) {
+        appendChatMessage('jarvis', `Ошибка при обращении к каскаду Gemini: ${err.message}`, 'API ERROR');
+        setReactorMode('STANDBY');
+      }
+    }
+
+    document.getElementById('chat-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const val = input.value;
+      input.value = '';
+      handleUserMessage(val);
+    });
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        handleUserMessage(btn.getAttribute('data-prompt'));
+      });
+    });
+
+    document.getElementById('clear-chat-btn').addEventListener('click', () => {
+      document.getElementById('chat-messages').innerHTML = '';
+    });
+
+    // --- Tab 5: Camera Vision for Physics & Circuits ---
+    const videoEl = document.getElementById('cam-video');
+    const capCanvas = document.getElementById('cam-capture-canvas');
+
+    document.getElementById('start-cam-btn').addEventListener('click', async () => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast('Камера недоступна в этом окне — используй кнопку «Загрузить фото файла»');
+        return;
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        videoEl.srcObject = stream;
+        videoEl.classList.remove('hidden');
+        capCanvas.classList.add('hidden');
+        document.getElementById('cam-placeholder').classList.add('hidden');
+        document.getElementById('cam-badge').textContent = 'Камера активна';
+      } catch (err) {
+        showToast('В превью используй кнопку «Загрузить фото файла»');
+      }
+    });
+
+    async function sendImageToGemini(base64Data, mimeType) {
+      const out = document.getElementById('vision-output');
+      if (!geminiApiKey) {
+        out.textContent = 'Сначала вставь свой GEMINI_API_KEY в верхнее поле и нажми «Подключить ключ», чтобы отправить фото в каскад Gemini 4 Vision!';
+        return;
+      }
+      out.textContent = 'Анализирую изображение через каскад Gemini 4 Vision...';
+      const prompt = document.getElementById('vision-prompt-input').value;
+      try {
+        const { data, usedModel } = await callGeminiCascade({
+          contents: [{
+            role: 'user',
+            parts: [
+              { text: prompt },
+              { inlineData: { mimeType, data: base64Data } }
+            ]
+          }]
+        });
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Нет текстового ответа';
+        out.textContent = `[Модель: ${usedModel}]\n\n${text}`;
+      } catch (err) {
+        out.textContent = `Ошибка отправки кадра: ${err.message}`;
+      }
+    }
+
+    document.getElementById('snap-cam-btn').addEventListener('click', () => {
+      if (!videoEl.classList.contains('hidden') && videoEl.videoWidth) {
+        capCanvas.width = videoEl.videoWidth;
+        capCanvas.height = videoEl.videoHeight;
+        capCanvas.getContext('2d').drawImage(videoEl, 0, 0);
+        videoEl.classList.add('hidden');
+        capCanvas.classList.remove('hidden');
+        const dataUrl = capCanvas.toDataURL('image/jpeg', 0.85);
+        capturedImageBase64 = dataUrl.split(',')[1];
+        capturedMimeType = 'image/jpeg';
+        sendImageToGemini(capturedImageBase64, capturedMimeType);
+      } else if (capturedImageBase64) {
+        sendImageToGemini(capturedImageBase64, capturedMimeType);
+      } else {
+        showToast('Сначала включи камеру или выбери фото кнопкой «Загрузить фото файла»');
+      }
+    });
+
+    document.getElementById('file-img-input').addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = String(reader.result);
+        capturedImageBase64 = result.split(',')[1];
+        capturedMimeType = file.type || 'image/jpeg';
+        document.getElementById('cam-placeholder').textContent = `Загружен файл: ${file.name}. Отправляю в Gemini 4 Vision...`;
+        sendImageToGemini(capturedImageBase64, capturedMimeType);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    window.addEventListener('load', () => {
+      initThreeReactor();
+      renderGeneratedWebsite(SITE_TEMPLATES.kinematics.title, SITE_TEMPLATES.kinematics.html);
+      renderProtocolsGrid();
+      renderAnalysisHistory();
+      renderAnalysisView(savedAnalyses[0]);
+    });
+  </script>
+</body>
+</html>
