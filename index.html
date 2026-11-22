@@ -489,7 +489,7 @@
             <span class="bear-paw">🐾</span>
         </div>
         <div class="bear-bubble" id="bear-speech">
-            Привет, Raiana! 🧸 С днём рождения! Нажми на меня, я скажу тебе секрет ✨
+            Привет, Раяна! 🧸 С днём рождения! Нажми на меня, я скажу тебе секрет ✨
         </div>
     </div>
 
@@ -504,7 +504,7 @@
         <!-- СТРАНИЦА 1 -->
         <div id="page-1">
             <div class="hero-header">
-                <h1>С Днём Рождения, Raiana! 🌸</h1>
+                <h1>С Днём Рождения, Раяна! 🌸</h1>
                 <p>Этот праздник посвящён тебе. Листай ниже — здесь спрятаны тёплые слова и сюрпризы специально для тебя!</p>
             </div>
 
@@ -514,8 +514,8 @@
                     <span class="envelope-icon" id="env-icon">✉️</span>
                     <div id="env-prompt" style="font-weight: 600; color: var(--rose);">Нажми на конверт, чтобы открыть</div>
                     <div id="letter-body" class="letter-content hidden">
-                        Дорогая <b>Raiana</b>! ✨<br><br>
-                        С днём рождения тебя! Хочу пожелать, чтобы в твоей жизни всегда было место для самых тёплых эмоций, искреннего смеха и людей, которые ценят тебя так же сильно, как я.<br><br>
+                        Дорогая <b>Раяна</b>! ✨<br><br>
+                        С днём рождения тебя! Хочу пожелать, чтобы в твоей жизни всегда было место для самых тёплых эмоций, искреннего смеха и людей, которые ценят тебя сильно.<br><br>
                         Ты невероятно светлый, добрый и особенный человек. Пусть каждая твоя мечта сбывается легко и красиво, а впереди ждёт множество поводов улыбаться! 💖
                     </div>
                 </div>
@@ -600,11 +600,11 @@
                 <div id="capsule-result" class="sealed-scroll hidden">
                     <div class="wax-seal">💖</div>
                     <div style="font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold);">
-                        Капсула желаний Raiana • Запечатано
+                        Капсула желаний Раяны • Запечатано
                     </div>
                     <div class="scroll-text" id="saved-wish-text"></div>
                     <div style="font-size: 0.78rem; color: rgba(255,255,255,0.65); margin-bottom: 14px;">
-                        Сохранено на этом устройстве ✨
+                        Запечатано ✨
                     </div>
                     <button class="nav-small-btn" onclick="editCapsule()">Изменить текст ✏️</button>
                 </div>
@@ -612,7 +612,7 @@
 
             <div class="section-card">
                 <div class="section-title">Твой отзыв на сюрприз 💌</div>
-                <p class="section-sub">Оцени это поздравление и напиши пару слов — всё автоматически сохранится на память!</p>
+                <p class="section-sub">Оцени это поздравление!</p>
 
                 <div id="review-form">
                     <div class="hearts-rating">
@@ -701,11 +701,10 @@
 
         var compliments = [
             "У тебя самая искренняя и тёплая улыбка, которая сразу поднимает настроение 🌸",
-            "С тобой всегда легко, весело и можно быть собой на 100% 💖",
+            "С тобой всегда легко, весело 💖",
             "Ты умеешь поддержать в нужный момент так, как никто другой ✨",
             "У тебя потрясающее чувство юмора и невероятная энергетика 🦋",
-            "Ты делаешь этот мир ярче просто тем, что в нём есть 🌷",
-            "Каждый наш разговор или прогулка превращается в классное воспоминание 💫"
+            "Ты делаешь этот мир ярче просто тем, что в нём есть 🌷"
         ];
 
         var fortunes = [
@@ -770,7 +769,7 @@
             }
 
             if (appState.introSeen) {
-                bearSay("С возвращением, Raiana! 🧸 Все твои пожелания и сюрпризы сохранены ✨");
+                bearSay("С возвращением, Раяна!✨");
             }
         }
 
@@ -889,7 +888,7 @@
         function openEnvelope() {
             document.getElementById('letter-body').classList.remove('hidden');
             document.getElementById('env-icon').textContent = '💖';
-            document.getElementById('env-prompt').textContent = 'Для тебя, Raiana ✨';
+            document.getElementById('env-prompt').textContent = 'Для тебя, Раяна ✨';
             appState.envelopeOpen = true;
             saveState();
         }
@@ -934,14 +933,14 @@
             document.getElementById('capsule-form').classList.add('hidden');
             document.getElementById('saved-wish-text').textContent = "«" + val + "»";
             document.getElementById('capsule-result').classList.remove('hidden');
-            bearSay("Капсула надёжно запечатана на этом устройстве! 🕯️✨");
+            bearSay("Капсула надёжно запечатана! 🕯️✨");
 
             appState.capsuleSealed = true;
             appState.capsuleText = val;
             saveState();
 
             sendToMail({
-                Раздел: "🕯️ Капсула желаний Raiana",
+                Раздел: "🕯️ Капсула желаний",
                 Желание: val
             });
         }
@@ -984,7 +983,7 @@
 
             document.getElementById('review-form').classList.add('hidden');
             document.getElementById('review-result').classList.remove('hidden');
-            bearSay("Ура! Отзыв сохранён и отправлен автору 📸");
+            bearSay("Ура!");
 
             appState.reviewSubmitted = true;
             appState.tags = tagNames;
@@ -992,7 +991,7 @@
             saveState();
 
             sendToMail({
-                Раздел: "💌 Отзыв Raiana на поздравление",
+                Раздел: "💌 Отзыв на поздравление",
                 Оценка: appState.rating + " из 5 (" + heartsStr + ")",
                 Эмоции: tagsText,
                 Комментарий: comment
@@ -1000,7 +999,7 @@
         }
 
         var bearPhrases = [
-            "Ты сегодня просто светишься от красоты, Raiana! ✨",
+            "Ты сегодня просто светишься от красоты, Раяна! ✨",
             "Этот мир намного светлее и добрее, потому что в нём есть ты 🌸",
             "Не забудь заглянуть на вторую страницу — там печеньки с предсказаниями! 🥠",
             "Если нажать на меня ещё раз, я скажу ещё один комплимент 🧸💕",
