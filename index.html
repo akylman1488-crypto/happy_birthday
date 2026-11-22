@@ -78,7 +78,11 @@
             pointer-events: none;
         }
 
-        .intro-text-wrap { position: relative; z-index: 2; }
+        .intro-text-wrap {
+            position: relative;
+            z-index: 2;
+        }
+
         .intro-sub {
             font-size: 0.9rem;
             letter-spacing: 3px;
@@ -98,14 +102,14 @@
         }
 
         /* =========================================
-           ОБЩАЯ СЕТКА: БОКОВЫЕ ФОТО (3 ШТ НА СТРАНИЦУ) + ЦЕНТР
+           СЕТКА: БОКОВЫЕ ФОТО (3 ШТ НА СТРАНИЦУ) + ЦЕНТР
            ========================================= */
         .main-stage {
             position: relative;
             z-index: 2;
             max-width: 1260px;
             margin: 0 auto;
-            padding: 115px 16px 80px;
+            padding: 115px 18px 80px;
             display: flex;
             align-items: flex-start;
             justify-content: center;
@@ -172,7 +176,6 @@
             font-weight: 600;
         }
 
-        /* Адаптация под узкие экраны */
         @media (max-width: 1060px) {
             .main-stage {
                 flex-direction: column;
@@ -180,7 +183,7 @@
             }
             .side-photos {
                 width: 100%;
-                max-width: 660px;
+                max-width: 700px;
                 flex-direction: row;
                 justify-content: center;
                 gap: 14px;
@@ -199,7 +202,7 @@
             }
         }
 
-        /* Модальное окно для просмотра фото крупно */
+        /* УВЕЛИЧЕННЫЙ ПРОСМОТР ФОТО */
         #photo-modal {
             position: fixed;
             inset: 0;
@@ -235,9 +238,9 @@
             color: #3b1c4a;
         }
 
-        /* ОСНОВНОЙ ЦЕНТРАЛЬНЫЙ КОНТЕЙНЕР */
+        /* ОСНОВНОЙ КОНТЕЙНЕР */
         #app-wrapper {
-            max-width: 660px;
+            max-width: 700px;
             width: 100%;
             flex-shrink: 0;
         }
@@ -282,7 +285,7 @@
         .hero-header h1 {
             font-family: Georgia, serif;
             font-style: italic;
-            font-size: clamp(2rem, 5vw, 3rem);
+            font-size: clamp(2rem, 6vw, 3.1rem);
             color: #ff9ebb;
             margin-bottom: 10px;
         }
@@ -629,16 +632,14 @@
             <span class="bear-paw">🐾</span>
         </div>
         <div class="bear-bubble" id="bear-speech">
-            Привет, Raiana! 🧸 С днём рождения! Нажми на меня, я скажу тебе секрет ✨
+            Привет, Раяна! 🧸 С днём рождения! Нажми на меня, я скажу тебе секрет ✨
         </div>
     </div>
 
-    <!-- ГЛАВНАЯ СЦЕНА: ФОТО СЛЕВА + ЦЕНТР + ФОТО СПРАВА (3 ФОТО НА СТРАНИЦУ) -->
     <div class="main-stage">
         <!-- ЛЕВАЯ КОЛОНКА ФОТО -->
         <div class="side-photos side-left" id="left-photos"></div>
 
-        <!-- ЦЕНТРАЛЬНЫЙ БЛОК -->
         <div id="app-wrapper">
             <div class="top-bar">
                 <button class="music-btn" onclick="toggleMusic()">
@@ -650,7 +651,7 @@
             <!-- СТРАНИЦА 1 -->
             <div id="page-1">
                 <div class="hero-header">
-                    <h1>С Днём Рождения, Raiana! 🌸</h1>
+                    <h1>С Днём Рождения, Раяна! 🌸</h1>
                     <p>Этот праздник посвящён тебе. Листай ниже — здесь спрятаны тёплые слова и сюрпризы специально для тебя!</p>
                 </div>
 
@@ -660,8 +661,8 @@
                         <span class="envelope-icon" id="env-icon">✉️</span>
                         <div id="env-prompt" style="font-weight: 600; color: var(--rose);">Нажми на конверт, чтобы открыть</div>
                         <div id="letter-body" class="letter-content hidden">
-                            Дорогая <b>Raiana</b>! ✨<br><br>
-                            С днём рождения тебя! Хочу пожелать, чтобы в твоей жизни всегда было место для самых тёплых эмоций, искреннего смеха и людей, которые ценят тебя так же сильно, как я.<br><br>
+                            Дорогая <b>Раяна</b>! ✨<br><br>
+                            С днём рождения тебя! Хочу пожелать, чтобы в твоей жизни всегда было место для самых тёплых эмоций, искреннего смеха и людей, которые ценят тебя сильно.<br><br>
                             Ты невероятно светлый, добрый и особенный человек. Пусть каждая твоя мечта сбывается легко и красиво, а впереди ждёт множество поводов улыбаться! 💖
                         </div>
                     </div>
@@ -746,11 +747,11 @@
                     <div id="capsule-result" class="sealed-scroll hidden">
                         <div class="wax-seal">💖</div>
                         <div style="font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold);">
-                            Капсула желаний Raiana • Запечатано
+                            Капсула желаний Раяны • Запечатано
                         </div>
                         <div class="scroll-text" id="saved-wish-text"></div>
                         <div style="font-size: 0.78rem; color: rgba(255,255,255,0.65); margin-bottom: 14px;">
-                            Сохранено на этом устройстве ✨
+                            Запечатано ✨
                         </div>
                         <button class="nav-small-btn" onclick="editCapsule()">Изменить текст ✏️</button>
                     </div>
@@ -758,7 +759,7 @@
 
                 <div class="section-card">
                     <div class="section-title">Твой отзыв на сюрприз 💌</div>
-                    <p class="section-sub">Оцени это поздравление и напиши пару слов — всё автоматически сохранится на память!</p>
+                    <p class="section-sub">Оцени это поздравление!</p>
 
                     <div id="review-form">
                         <div class="hearts-rating">
@@ -803,7 +804,7 @@
 
         // ========================================================
         // НАСТРОЙКА ФОТОГРАФИЙ (3 ФОТО НА 1-Й СТРАНИЦЕ И 3 НА 2-Й)
-        // Загрузи файлы photo1.jpg ... photo6.jpg в репозиторий GitHub
+        // Замени "photo1.jpg"..."photo6.jpg" на свои ссылки или имена файлов
         // ========================================================
         var page1Photos = [
             { src: "photo1.jpg", caption: "Самая яркая ✨" },
@@ -856,12 +857,10 @@
                 rightBox.innerHTML = "";
 
                 if (pageNum === 1) {
-                    // Страница 1: 2 фото слева, 1 фото справа (итого 3 фото)
                     leftBox.appendChild(createPolaroidElement(list[0]));
                     leftBox.appendChild(createPolaroidElement(list[1]));
                     rightBox.appendChild(createPolaroidElement(list[2]));
                 } else {
-                    // Страница 2: 1 фото слева, 2 фото справа (итого 3 фото)
                     leftBox.appendChild(createPolaroidElement(list[0]));
                     rightBox.appendChild(createPolaroidElement(list[1]));
                     rightBox.appendChild(createPolaroidElement(list[2]));
@@ -882,6 +881,7 @@
             document.getElementById('photo-modal').classList.remove('open');
         }
 
+        // Локальное состояние конкретного устройства (iPad / телефон)
         var appState = {
             introSeen: false,
             page: 1,
@@ -931,11 +931,10 @@
 
         var compliments = [
             "У тебя самая искренняя и тёплая улыбка, которая сразу поднимает настроение 🌸",
-            "С тобой всегда легко, весело и можно быть собой на 100% 💖",
+            "С тобой всегда легко, весело 💖",
             "Ты умеешь поддержать в нужный момент так, как никто другой ✨",
             "У тебя потрясающее чувство юмора и невероятная энергетика 🦋",
-            "Ты делаешь этот мир ярче просто тем, что в нём есть 🌷",
-            "Каждый наш разговор или прогулка превращается в классное воспоминание 💫"
+            "Ты делаешь этот мир ярче просто тем, что в нём есть 🌷"
         ];
 
         var fortunes = [
@@ -947,6 +946,7 @@
             "Удача будет твоим главным спутником во всех начинаниях 🦋"
         ];
 
+        // Восстановление сохранённых данных при повторном входе с того же устройства
         function applySavedState() {
             if (appState.envelopeOpen) {
                 document.getElementById('letter-body').classList.remove('hidden');
@@ -1002,7 +1002,7 @@
             }
 
             if (appState.introSeen) {
-                bearSay("С возвращением, Raiana! 🧸 Все твои пожелания и фото сохранены ✨");
+                bearSay("С возвращением, Раяна!✨");
             }
         }
 
@@ -1023,6 +1023,7 @@
                 container.appendChild(el);
             }
 
+            // Салют показывается только при самом первом входе на этом устройстве
             if (!appState.introSeen) {
                 appState.introSeen = true;
                 saveState();
@@ -1109,7 +1110,7 @@
                 p1.classList.add('hidden');
                 p2.classList.remove('hidden');
                 indicator.textContent = 'Страница 2 из 2 • Сюрпризы ✨';
-                bearSay("Смотри, и фотки обновились! Попробуй разломить печеньку 🥠");
+                bearSay("Ого, мы на второй странице! Попробуй разломить печеньку с предсказанием 🥠");
             } else {
                 p2.classList.add('hidden');
                 p1.classList.remove('hidden');
@@ -1122,7 +1123,7 @@
         function openEnvelope() {
             document.getElementById('letter-body').classList.remove('hidden');
             document.getElementById('env-icon').textContent = '💖';
-            document.getElementById('env-prompt').textContent = 'Для тебя, Raiana ✨';
+            document.getElementById('env-prompt').textContent = 'Для тебя, Раяна ✨';
             appState.envelopeOpen = true;
             saveState();
         }
@@ -1167,14 +1168,14 @@
             document.getElementById('capsule-form').classList.add('hidden');
             document.getElementById('saved-wish-text').textContent = "«" + val + "»";
             document.getElementById('capsule-result').classList.remove('hidden');
-            bearSay("Капсула надёжно запечатана на этом устройстве! 🕯️✨");
+            bearSay("Капсула надёжно запечатана! 🕯️✨");
 
             appState.capsuleSealed = true;
             appState.capsuleText = val;
             saveState();
 
             sendToMail({
-                Раздел: "🕯️ Капсула желаний Raiana",
+                Раздел: "🕯️ Капсула желаний",
                 Желание: val
             });
         }
@@ -1217,7 +1218,7 @@
 
             document.getElementById('review-form').classList.add('hidden');
             document.getElementById('review-result').classList.remove('hidden');
-            bearSay("Ура! Отзыв сохранён и отправлен автору 📸");
+            bearSay("Ура!");
 
             appState.reviewSubmitted = true;
             appState.tags = tagNames;
@@ -1225,7 +1226,7 @@
             saveState();
 
             sendToMail({
-                Раздел: "💌 Отзыв Raiana на поздравление",
+                Раздел: "💌 Отзыв на поздравление",
                 Оценка: appState.rating + " из 5 (" + heartsStr + ")",
                 Эмоции: tagsText,
                 Комментарий: comment
@@ -1233,9 +1234,9 @@
         }
 
         var bearPhrases = [
-            "Ты сегодня просто светишься от красоты, Raiana! ✨",
+            "Ты сегодня просто светишься от красоты, Раяна! ✨",
             "Этот мир намного светлее и добрее, потому что в нём есть ты 🌸",
-            "Нажми на любую фотку по бокам, чтобы открыть её крупно 📸",
+            "Не забудь заглянуть на вторую страницу — там печеньки с предсказаниями! 🥠",
             "Если нажать на меня ещё раз, я скажу ещё один комплимент 🧸💕",
             "Пусть вокруг всегда будет много твоих любимых вкусняшек и искреннего смеха 🍓",
             "Ты заслуживаешь самого волшебного дня рождения! 👑"
